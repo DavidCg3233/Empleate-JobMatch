@@ -1,0 +1,146 @@
+/* =====================================================================
+   JobMatch - swipe.css  (pantalla tipo "Tinder")
+   Requiere main.css. La tarjeta de arriba es el ÚLTIMO hijo de .swipe-stage.
+   El JS (Hammer.js) mueve la tarjeta con style.transform y ajusta la
+   opacidad de .swipe-stamp.like / .swipe-stamp.nope según el arrastre.
+   ===================================================================== */
+
+.swipe-page { min-height: 100vh; display: flex; flex-direction: column; }
+
+.swipe-stage {
+  position: relative;
+  width: min(92vw, 400px);
+  height: min(66vh, 560px);
+  margin: 1.25rem auto 0;
+  touch-action: pan-y;
+}
+
+.swipe-card {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; gap: 0.85rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden; cursor: grab; user-select: none; -webkit-user-select: none;
+  will-change: transform;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.swipe-card.dragging { transition: none; cursor: grabbing; }
+
+/* Tarjetas apiladas detrás */
+.swipe-card:nth-last-child(2) { transform: scale(0.96) translateY(12px); opacity: 0.9; }
+.swipe-card:nth-last-child(3) { transform: scale(0.92) translateY(24px); opacity: 0.7; }
+.swipe-card:nth-last-child(n + 4) { transform: scale(0.9) translateY(30px); opacity: 0; pointer-events: none; }
+
+/* Salida al soltar */
+.swipe-card.leave-right { transform: translateX(140%) rotate(18deg) !important; opacity: 0; }
+.swipe-card.leave-left { transform: translateX(-140%) rotate(-18deg) !important; opacity: 0; }
+
+/* Sellos ME INTERESA / NO */
+.swipe-stamp {
+  position: absolute; top: 1.5rem; z-index: 2; opacity: 0; pointer-events: none;
+  font-weight: 800; font-size: 1.3rem; letter-spacing: 0.06em;
+  padding: 0.25rem 0.8rem; border: 3px solid; border-radius: var(--radius);
+}
+.swipe-stamp.like { left: 1.5rem; color: var(--like); border-color: var(--like); transform: rotate(-12deg); }
+.swipe-stamp.nope { right: 1.5rem; color: var(--nope); border-color: var(--nope); transform: rotate(12deg); }
+
+/* Contenido de la tarjeta */
+.card-head { display: flex; align-items: center; gap: 0.9rem; padding-right: 4.5rem; }
+.card-head .avatar { width: 56px; height: 56px; }
+.card-heading { min-width: 0; }
+.card-heading h3 { margin: 0; font-size: 1.2rem; }
+.card-subtitle { margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+
+.card-meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; color: var(--text-muted); font-size: 0.88rem; font-weight: 600; }
+.card-section-title {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted); margin: 0 0 0.35rem;
+}
+.card-summary {
+  margin: 0; color: var(--text); font-size: 0.95rem;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-body { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 0.85rem; }
+.card-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+
+/* % de compatibilidad */
+.score-badge {
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  min-width: 56px; text-align: center;
+  font-weight: 800; font-size: 0.95rem;
+  padding: 0.4rem 0.7rem; border-radius: var(--radius-full);
+  background: var(--primary-soft); color: var(--primary);
+}
+.score-badge.score-high { background: var(--success-soft); color: var(--success); }
+.score-badge.score-mid { background: var(--warning-soft); color: var(--warning); }
+.score-badge.score-low { background: var(--surface-2); color: var(--text-muted); }
+
+.ai-reason {
+  background: var(--primary-soft); color: var(--text);
+  border-radius: var(--radius); padding: 0.7rem 0.9rem; font-size: 0.85rem;
+}
+.ai-reason strong { color: var(--primary); }
+
+/* Botones de acción */
+.swipe-actions { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin: 1.75rem 0 1rem; }
+.swipe-btn {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; line-height: 1; cursor: pointer;
+  background: var(--surface); border: 2px solid var(--border); box-shadow: var(--shadow-md);
+  transition: transform 0.15s, background-color 0.2s, border-color 0.2s;
+}
+.swipe-btn:hover { transform: scale(1.08); }
+.swipe-btn:active { transform: scale(0.96); }
+.swipe-btn.nope { color: var(--nope); }
+.swipe-btn.nope:hover { background: var(--danger-soft); border-color: var(--nope); }
+.swipe-btn.like { color: var(--like); }
+.swipe-btn.like:hover { background: var(--success-soft); border-color: var(--like); }
+.swipe-btn.small { width: 48px; height: 48px; font-size: 1.15rem; color: var(--text-muted); }
+
+/* Sin más tarjetas */
+.swipe-empty {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; gap: 0.5rem;
+  padding: 2rem; color: var(--text-muted);
+  border: 2px dashed var(--border); border-radius: var(--radius-lg);
+}
+.swipe-empty h3 { color: var(--text); }
+
+/* Barra de filtros */
+.filters-bar { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.25rem 1.25rem; scrollbar-width: none; }
+.filters-bar::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex: none; font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  padding: 0.45rem 0.95rem; border-radius: var(--radius-full);
+  background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border);
+}
+.filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+.filter-chip.active { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+
+/* Ventana de "¡Es un match!" */
+.match-overlay {
+  position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; background: rgba(20, 24, 27, 0.6); backdrop-filter: blur(4px);
+}
+.match-modal {
+  width: 100%; max-width: 380px; text-align: center; padding: 2rem 1.5rem;
+  background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  animation: pop-in 0.3s ease;
+}
+.match-modal h2 { color: var(--primary); font-size: 1.8rem; }
+.match-avatars { display: flex; justify-content: center; margin: 1.25rem 0; }
+.match-avatars .avatar { width: 76px; height: 76px; border: 4px solid var(--surface); }
+.match-avatars .avatar + .avatar { margin-left: -14px; background: var(--primary-soft); color: var(--primary); }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+
+/* Lista de matches */
+.match-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.match-item {
+  display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.match-item:hover { border-color: var(--primary); }

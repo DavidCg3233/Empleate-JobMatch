@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body class="auth-page">
+
+  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema"></button>
+
+  <main class="card auth-card">
+    <header class="auth-header">
+      <h1 class="brand">Empléate <span>Jobmatch</span></h1>
+      <p class="brand-tagline">Encuentra tu match laboral</p>
+    </header>
+
+    <form id="login-form" class="stack" novalidate>
+      <div class="field">
+        <label for="email" class="label">Correo electrónico</label>
+        <input id="email" type="email" class="input" required autocomplete="email" placeholder="tucorreo@ejemplo.com" />
+      </div>
+
+      <div class="field">
+        <label for="password" class="label">Contraseña</label>
+        <div class="input-group">
+          <input id="password" type="password" class="input" required autocomplete="current-password" placeholder="••••••••" />
+          <button type="button" id="toggle-password" class="input-toggle">Mostrar</button>
+        </div>
+      </div>
+
+      <div id="error-box" role="alert" class="alert alert-error hidden"></div>
+
+      <div class="text-right">
+        <a href="forgot-password.html">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
+    </form>
+
+    <p class="auth-footer">
+      ¿No tienes cuenta? <a href="register.html">Regístrate</a>
+    </p>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/loginController.js"></script>
+</body>
+</html>

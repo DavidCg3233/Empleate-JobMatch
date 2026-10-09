@@ -1,0 +1,15 @@
+# Entorno y secretos
+venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Archivos subidos (CVs y logos reales)
+backend/uploads/
+
+# Editor / sistema
+.idea/
+.DS_Store
+
