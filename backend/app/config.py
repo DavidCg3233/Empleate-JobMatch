@@ -22,6 +22,29 @@ class Settings(BaseSettings):
     LOCK_MINUTES: int = 15
 
     FRONTEND_ORIGINS: str = "http://127.0.0.1:5500,http://localhost:5500"
+    # Dirección donde se abre la carpeta frontend/ (para el enlace del correo de recuperación)
+    FRONTEND_URL: str = "http://127.0.0.1:5500/frontend"
+    RESET_TOKEN_MINUTES: int = 30
+
+    # Correo (opcional). Si SMTP_HOST está vacío, el correo se imprime en la consola.
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = "Empléate Jobmatch <no-reply@empleate.local>"
+    SMTP_USE_TLS: bool = True
+
+    # Archivos subidos
+    UPLOAD_DIR: Path = BASE_DIR / "uploads"
+    MAX_CV_MB: int = 5
+
+    # IA para leer hojas de vida: claude | openai | none (sin IA se usa el lector por reglas)
+    AI_PROVIDER: str = "none"
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-opus-5-5"
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    AI_TIMEOUT_SECONDS: int = 60
 
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 

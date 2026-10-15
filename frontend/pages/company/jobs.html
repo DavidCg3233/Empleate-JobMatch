@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de la empresa | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body class="auth-page">
+  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema"></button>
+
+  <main class="card auth-card text-center">
+    <h1 class="brand">Empléate <span>Jobmatch</span></h1>
+    <h2 class="mt-3">Panel de la empresa</h2>
+    <p id="welcome" class="text-muted"></p>
+    <p class="alert alert-info">En construcción: aquí irán las vacantes y los perfiles de aspirantes.</p>
+    <button id="logout" type="button" class="btn btn-outline btn-block mt-2">Cerrar sesión</button>
+  </main>
+
+  <script type="module">
+    import { logout, requireRole } from "../../assets/js/utils/auth.js";
+    requireRole("empresa");
+    document.getElementById("welcome").textContent = "Sesión iniciada como " + (localStorage.getItem("email") || "");
+    document.getElementById("logout").addEventListener("click", logout);
+  </script>
+</body>
+</html>

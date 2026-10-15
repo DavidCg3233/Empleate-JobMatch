@@ -34,9 +34,19 @@ export function redirectByRole(role) {
   window.location.href = page(ROLE_HOME[role] ?? "auth/login.html");
 }
 
+// ¿El token JWT ya venció? (se lee su fecha "exp"; el backend igual lo vuelve a verificar)
+export function isTokenExpired(token = getToken()) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return !payload.exp || payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+}
+
 // Úsalo al inicio de cada pantalla protegida: requireRole("empresa")
 export function requireRole(expectedRole) {
-  if (!getToken() || getRole() !== expectedRole) {
+  if (!getToken() || isTokenExpired() || getRole() !== expectedRole) {
     clearSession();
     window.location.href = page("auth/login.html");
   }
