@@ -33,6 +33,7 @@ def db_session(tmp_path, monkeypatch):
         levels = ["Bachillerato", "Técnico", "Tecnólogo", "Pregrado", "Especialización", "Maestría", "Doctorado"]
         s.add_all([m.EducationLevel(id=i, name=n, rank_order=i) for i, n in enumerate(levels, 1)])
         s.add_all([m.Language(id=1, name="Español"), m.Language(id=2, name="Inglés")])
+        s.add_all([m.ContractType(id=1, name="Término indefinido"), m.ContractType(id=2, name="Término fijo")])
         s.commit()
 
     monkeypatch.setattr(settings, "UPLOAD_DIR", tmp_path / "uploads")

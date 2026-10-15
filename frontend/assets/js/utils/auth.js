@@ -45,11 +45,14 @@ export function isTokenExpired(token = getToken()) {
 }
 
 // Úsalo al inicio de cada pantalla protegida: requireRole("empresa")
+// Devuelve false (y envía al login) si no hay una sesión válida con ese rol.
 export function requireRole(expectedRole) {
   if (!getToken() || isTokenExpired() || getRole() !== expectedRole) {
     clearSession();
     window.location.href = page("auth/login.html");
+    return false;
   }
+  return true;
 }
 
 export function logout() {

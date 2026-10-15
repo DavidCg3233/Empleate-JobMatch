@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscar vacantes | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container page-main">
+    <header class="page-header">
+      <h1 class="page-title">Buscar vacantes</h1>
+      <p class="hint">Filtra por ciudad, modalidad, tipo de contrato o salario. El porcentaje indica qué tan compatible es la vacante con tu perfil.</p>
+    </header>
+
+    <form id="search-form" class="card card-flat search-panel" role="search" novalidate>
+      <div class="search-row">
+        <label for="q" class="sr-only">Buscar por cargo, empresa o habilidad</label>
+        <input id="q" name="q" type="search" class="input" maxlength="100" autocomplete="off"
+          placeholder="Cargo o habilidad" title="Busca por cargo, empresa o habilidad. Ej: Python, contador, bodega" />
+        <button type="submit" class="btn btn-primary">Buscar</button>
+      </div>
+
+      <button type="button" id="filters-toggle" class="btn btn-outline btn-sm filters-toggle"
+        aria-expanded="false" aria-controls="filters-extra">⚙️ Filtros</button>
+
+      <div id="filters-extra" class="filters-extra">
+      <div class="search-filters">
+        <div class="field">
+          <label for="city_id" class="label">Ciudad</label>
+          <select id="city_id" name="city_id" class="select">
+            <option value="">Todas las ciudades</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="modality" class="label">Modalidad</label>
+          <select id="modality" name="modality" class="select">
+            <option value="">Todas</option>
+            <option value="remoto">Remoto</option>
+            <option value="hibrido">Híbrido</option>
+            <option value="presencial">Presencial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="contract_type_id" class="label">Contrato</label>
+          <select id="contract_type_id" name="contract_type_id" class="select">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="salary_min" class="label">Salario mínimo</label>
+          <select id="salary_min" name="salary_min" class="select">
+            <option value="">Cualquier salario</option>
+            <option value="1500000">Desde $1.500.000</option>
+            <option value="2500000">Desde $2.500.000</option>
+            <option value="4000000">Desde $4.000.000</option>
+            <option value="6000000">Desde $6.000.000</option>
+            <option value="8000000">Desde $8.000.000</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sort" class="label">Ordenar por</label>
+          <select id="sort" name="sort" class="select">
+            <option value="relevancia">Más compatibles</option>
+            <option value="recientes">Más recientes</option>
+            <option value="salario">Mayor salario</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-between search-options">
+        <label class="checkbox">
+          <input type="checkbox" id="hide_discarded" name="hide_discarded" />
+          <span>Ocultar las que descarté</span>
+        </label>
+        <button type="button" id="clear-btn" class="btn btn-ghost btn-sm">Limpiar filtros</button>
+      </div>
+      </div>
+    </form>
+
+    <p id="results-summary" class="results-summary" aria-live="polite"></p>
+    <div id="results" class="job-list"></div>
+    <div class="text-center mt-3">
+      <button type="button" id="more-btn" class="btn btn-outline" hidden>Cargar más vacantes</button>
+    </div>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/applicantSearchController.js"></script>
+</body>
+</html>

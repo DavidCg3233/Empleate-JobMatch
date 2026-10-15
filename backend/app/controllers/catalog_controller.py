@@ -1,4 +1,4 @@
-"""Catálogos públicos que necesitan los formularios (ciudades, sectores, educación, idiomas)."""
+"""Catálogos públicos que necesitan los formularios (ciudades, sectores, educación, idiomas, contratos)."""
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models.catalogs import EducationLevel, Language
 from app.models.city import City, Department
 from app.models.industry import Industry
+from app.models.job import ContractType
 from app.schemas.catalog_schema import CatalogItemOut, CityOut, IndustryOut
 
 router = APIRouter(prefix="/api/catalogs", tags=["Catálogos"])
@@ -37,4 +38,10 @@ def list_education_levels(db: Session = Depends(get_db)):
 @router.get("/languages", response_model=list[CatalogItemOut])
 def list_languages(db: Session = Depends(get_db)):
     rows = db.execute(select(Language.id, Language.name).order_by(Language.id)).all()
+    return [{"id": r.id, "name": r.name} for r in rows]
+
+
+@router.get("/contract-types", response_model=list[CatalogItemOut])
+def list_contract_types(db: Session = Depends(get_db)):
+    rows = db.execute(select(ContractType.id, ContractType.name).order_by(ContractType.id)).all()
     return [{"id": r.id, "name": r.name} for r in rows]

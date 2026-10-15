@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.controllers import auth_controller, catalog_controller
+from app.controllers import auth_controller, catalog_controller, job_controller, match_controller, swipe_controller
 from app.database import get_db
 
 app = FastAPI(title="Empléate Jobmatch API", version="0.1.0")
@@ -20,6 +20,9 @@ app.add_middleware(
 
 app.include_router(auth_controller.router)
 app.include_router(catalog_controller.router)
+app.include_router(job_controller.router)
+app.include_router(swipe_controller.router)
+app.include_router(match_controller.router)
 
 
 @app.get("/api/health", tags=["Sistema"])

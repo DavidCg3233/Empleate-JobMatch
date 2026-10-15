@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis matches | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container container-narrow page-main">
+    <header class="page-header">
+      <h1 class="page-title">Mis matches</h1>
+      <p class="hint">Un match ocurre cuando a ti te interesa una vacante y a la empresa le interesa tu perfil.</p>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Mis vacantes">
+      <button type="button" class="tab" role="tab" id="tab-matches" aria-controls="panel-matches" aria-selected="true">
+        Matches <span class="tab-count" id="count-matches"></span>
+      </button>
+      <button type="button" class="tab" role="tab" id="tab-liked" aria-controls="panel-liked" aria-selected="false" tabindex="-1">
+        Me interesan <span class="tab-count" id="count-liked"></span>
+      </button>
+    </div>
+
+    <section id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" class="match-list" aria-live="polite"></section>
+    <section id="panel-liked" role="tabpanel" aria-labelledby="tab-liked" class="job-list job-list-single" aria-live="polite" hidden></section>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/applicantMatchesController.js"></script>
+</body>
+</html>

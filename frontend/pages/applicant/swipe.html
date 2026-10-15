@@ -3,29 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pantalla del aspirante | Empléate Jobmatch</title>
+  <title>Explorar vacantes | Empléate Jobmatch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
   <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
   <script src="../../assets/js/utils/theme.js"></script>
 </head>
-<body class="auth-page">
-  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema"></button>
+<body class="swipe-page">
 
-  <main class="card auth-card text-center">
-    <h1 class="brand">Empléate <span>Jobmatch</span></h1>
-    <h2 class="mt-3">Pantalla del aspirante</h2>
-    <p id="welcome" class="text-muted"></p>
-    <p class="alert alert-info">En construcción: aquí irá el swipe de vacantes.</p>
-    <button id="logout" type="button" class="btn btn-outline btn-block mt-2">Cerrar sesión</button>
+  <main class="swipe-main">
+    <header class="page-header container">
+      <h1 class="page-title">Explora vacantes</h1>
+      <p class="hint">Desliza a la derecha si te interesa y a la izquierda si no. Toca la tarjeta para ver el detalle.</p>
+    </header>
+
+    <div class="filters-bar filters-center" id="modality-filters" role="group" aria-label="Filtrar por modalidad"></div>
+
+    <!-- La tarjeta de arriba es el ÚLTIMO hijo. El recuadro "sin vacantes" va siempre de primero (queda debajo). -->
+    <div class="swipe-stage" id="stage">
+      <div class="swipe-empty" id="swipe-empty" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Buscando vacantes para ti...</p>
+      </div>
+    </div>
+
+    <div class="swipe-actions">
+      <button type="button" class="swipe-btn small" id="btn-undo" aria-label="Deshacer la última decisión" title="Deshacer (tecla Retroceso)" disabled>↺</button>
+      <button type="button" class="swipe-btn nope" id="btn-nope" aria-label="No me interesa" title="No me interesa (flecha izquierda)" disabled>✕</button>
+      <button type="button" class="swipe-btn like" id="btn-like" aria-label="Me interesa" title="Me interesa (flecha derecha)" disabled>♥</button>
+      <button type="button" class="swipe-btn small" id="btn-info" aria-label="Ver detalle de la vacante" title="Ver detalle (flecha arriba)" disabled>ℹ</button>
+    </div>
+    <p class="hint text-center keyboard-hint">Atajos: ← no me interesa · → me interesa · ↑ detalle · Retroceso deshacer</p>
   </main>
 
-  <script type="module">
-    import { logout, requireRole } from "../../assets/js/utils/auth.js";
-    requireRole("aspirante");
-    document.getElementById("welcome").textContent = "Sesión iniciada como " + (localStorage.getItem("email") || "");
-    document.getElementById("logout").addEventListener("click", logout);
-  </script>
+  <script type="module" src="../../assets/js/controllers/applicantSwipeController.js"></script>
 </body>
 </html>

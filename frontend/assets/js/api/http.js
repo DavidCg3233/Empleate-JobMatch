@@ -1,6 +1,6 @@
 // Cliente HTTP base: agrega el token JWT y normaliza los errores.
 import { API_URL } from "../config.js";
-import { getToken } from "../utils/auth.js";
+import { clearSession, getToken, logout } from "../utils/auth.js";
 
 export class ApiError extends Error {
   constructor(message, status, data) {
@@ -32,12 +32,10 @@ function extractMessage(data) {
 export async function http(path, { method = "GET", body, auth = true } = {}) {
   const headers = {};
   const isForm = body instanceof FormData;
+  const token = auth ? getToken() : null;
 
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
-  if (auth) {
-    const token = getToken();
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-  }
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   let response;
   try {
@@ -51,6 +49,11 @@ export async function http(path, { method = "GET", body, auth = true } = {}) {
   }
 
   const data = await response.json().catch(() => ({}));
+  // La sesión venció o es inválida: se cierra y se vuelve al login (salvo que ya esté en las pantallas de acceso)
+  if (response.status === 401 && token) {
+    if (/\/pages\/auth\//.test(window.location.pathname)) clearSession();
+    else logout();
+  }
   if (!response.ok) throw new ApiError(extractMessage(data), response.status, data);
   return data;
 }
