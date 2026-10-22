@@ -57,8 +57,17 @@ class LoginResponse(BaseModel):
 class _RegisterBase(BaseModel):
     email: EmailStr
     password: str
+    # Aceptación de los Términos y Condiciones y de la Política de Tratamiento de Datos (Ley 1581 de 2012)
+    accept_terms: bool
 
     _password = field_validator("password")(validate_password_rules)
+
+    @field_validator("accept_terms")
+    @classmethod
+    def check_terms(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Debes aceptar los términos y condiciones y la política de tratamiento de datos.")
+        return value
 
 
 class RegisterApplicantRequest(_RegisterBase):
@@ -73,7 +82,7 @@ class RegisterApplicantRequest(_RegisterBase):
     summary: str | None = Field(default=None, max_length=2000)
     experiences: list[ExperienceIn] = Field(default_factory=list, max_length=15)
     educations: list[EducationIn] = Field(default_factory=list, max_length=10)
-    skills: list[SkillName] = Field(default_factory=list, max_length=25)
+    skills: list[SkillName] = Field(default_factory=list, max_length=40)
     languages: list[LanguageIn] = Field(default_factory=list, max_length=10)
 
     _clean = field_validator(
@@ -143,3 +152,10 @@ class ResetPasswordRequest(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str
+
+    _password = field_validator("new_password")(validate_password_rules)

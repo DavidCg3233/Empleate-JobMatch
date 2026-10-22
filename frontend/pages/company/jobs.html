@@ -3,29 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel de la empresa | Empléate Jobmatch</title>
+  <title>Mis vacantes | Empléate Jobmatch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
   <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/company.css" />
   <script src="../../assets/js/utils/theme.js"></script>
 </head>
-<body class="auth-page">
-  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema"></button>
+<body>
 
-  <main class="card auth-card text-center">
-    <h1 class="brand">Empléate <span>Jobmatch</span></h1>
-    <h2 class="mt-3">Panel de la empresa</h2>
-    <p id="welcome" class="text-muted"></p>
-    <p class="alert alert-info">En construcción: aquí irán las vacantes y los perfiles de aspirantes.</p>
-    <button id="logout" type="button" class="btn btn-outline btn-block mt-2">Cerrar sesión</button>
+  <main class="container page-main">
+    <div class="page-header-row">
+      <header class="page-header">
+        <h1 class="page-title">Mis vacantes</h1>
+        <p class="hint">Publica vacantes, revisa a los aspirantes interesados y encuentra tu match.</p>
+      </header>
+      <a href="job_form.html" class="btn btn-primary">+ Nueva vacante</a>
+    </div>
+
+    <section class="kpis" aria-label="Resumen">
+      <div class="kpi"><span class="kpi-value" id="kpi-active">–</span><span class="kpi-label">Vacantes activas</span></div>
+      <div class="kpi" id="kpi-pending-box"><span class="kpi-value" id="kpi-pending">–</span><span class="kpi-label">Interesados por revisar</span></div>
+      <div class="kpi"><span class="kpi-value" id="kpi-matches">–</span><span class="kpi-label">Matches</span></div>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Filtrar vacantes por estado" id="status-tabs"></div>
+
+    <section id="job-list" class="company-jobs" aria-live="polite">
+      <div class="results-empty"><span class="spinner" aria-hidden="true"></span></div>
+    </section>
   </main>
 
-  <script type="module">
-    import { logout, requireRole } from "../../assets/js/utils/auth.js";
-    requireRole("empresa");
-    document.getElementById("welcome").textContent = "Sesión iniciada como " + (localStorage.getItem("email") || "");
-    document.getElementById("logout").addEventListener("click", logout);
-  </script>
+  <script type="module" src="../../assets/js/controllers/jobsController.js"></script>
 </body>
 </html>

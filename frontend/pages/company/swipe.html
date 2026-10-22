@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidatos | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/company.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body class="swipe-page">
+
+  <main class="swipe-main">
+    <header class="page-header container">
+      <h1 class="page-title">Revisa candidatos</h1>
+      <p class="hint">Desliza a la derecha si te interesa el perfil y a la izquierda si no. Si a la persona también le interesa tu vacante, ¡es un match!</p>
+    </header>
+
+    <div class="job-picker container">
+      <label for="job-select" class="label">Vacante:</label>
+      <select id="job-select" class="select" disabled>
+        <option value="">Cargando vacantes...</option>
+      </select>
+    </div>
+    <div class="filters-bar filters-center" id="pool-filters" role="group" aria-label="Qué perfiles ver"></div>
+
+    <!-- La tarjeta de arriba es el ÚLTIMO hijo. El recuadro "sin candidatos" va siempre de primero (queda debajo). -->
+    <div class="swipe-stage" id="stage">
+      <div class="swipe-empty" id="swipe-empty" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Cargando...</p>
+      </div>
+    </div>
+
+    <div class="swipe-actions">
+      <button type="button" class="swipe-btn small" id="btn-undo" aria-label="Deshacer la última decisión" title="Deshacer (tecla Retroceso)" disabled>↺</button>
+      <button type="button" class="swipe-btn nope" id="btn-nope" aria-label="No me interesa" title="No me interesa (flecha izquierda)" disabled>✕</button>
+      <button type="button" class="swipe-btn like" id="btn-like" aria-label="Me interesa" title="Me interesa (flecha derecha)" disabled>♥</button>
+      <button type="button" class="swipe-btn small" id="btn-info" aria-label="Ver perfil completo" title="Ver perfil (flecha arriba)" disabled>ℹ</button>
+    </div>
+    <p class="hint text-center keyboard-hint">Atajos: ← no me interesa · → me interesa · ↑ perfil · Retroceso deshacer</p>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/companySwipeController.js"></script>
+</body>
+</html>

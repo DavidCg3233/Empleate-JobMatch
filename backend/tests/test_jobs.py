@@ -56,7 +56,7 @@ def auth(token):
 def world(client, db_session):
     """Aspirante en Cali con Python/SQL y 3 años de experiencia + varias vacantes."""
     r = client.post("/api/auth/register/applicant", json={
-        "first_name": "Laura", "last_name": "Gómez", "email": "laura@correo.com", "password": PASSWORD,
+        "first_name": "Laura", "last_name": "Gómez", "email": "laura@correo.com", "password": PASSWORD, "accept_terms": True,
         "city_id": 1, "skills": ["Python", "SQL"],
         "experiences": [{"position": "Dev", "company_name": "ACME", "start_date": "2021-01-01", "is_current": True}],
         "educations": [{"education_level_id": 4, "institution": "Univalle", "degree": "Ingeniería"}],
@@ -286,7 +286,7 @@ def test_only_applicants_can_use_job_search(client, world):
     assert client.get("/api/jobs/feed").status_code == 401
     r = client.post("/api/auth/register/company", json={
         "name": "Otra SAS", "tax_id": "901000111-1", "industry_id": 1, "size": "1-10", "city_id": 1,
-        "contact_name": "Leo", "email": "leo@otra.com", "password": PASSWORD,
+        "contact_name": "Leo", "email": "leo@otra.com", "password": PASSWORD, "accept_terms": True,
     })
     company_headers = auth(r.json()["access_token"])
     assert client.get("/api/jobs/feed", headers=company_headers).status_code == 403

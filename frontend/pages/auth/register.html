@@ -43,10 +43,10 @@
         <label for="cv-file" id="cv-drop" class="file-drop" tabindex="0">
           <span class="file-drop-icon" aria-hidden="true">📄</span>
           <strong>Sube tu hoja de vida y llenamos el formulario por ti</strong>
-          <span class="hint">PDF o Word (.docx), máximo 5 MB · Opcional · Haz clic o arrastra el archivo aquí</span>
+          <span class="hint">PDF, Word (.docx), OpenDocument (.odt), RTF o texto · máximo 5 MB · Opcional · Haz clic o arrastra el archivo aquí</span>
         </label>
         <input id="cv-file" type="file" class="hidden"
-          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+          accept=".pdf,.docx,.odt,.rtf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/plain" />
         <div id="cv-status" class="cv-status hidden" role="status" aria-live="polite">
           <span class="cv-status-icon"></span>
           <span class="cv-status-text"></span>
@@ -152,12 +152,13 @@
       <div class="field span-2">
         <label class="checkbox">
           <input type="checkbox" name="terms" />
-          <span>Acepto los términos y condiciones y el tratamiento de mis datos personales.</span>
+          <span>Acepto los <a href="../legal/terminos.html#terminos" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="../legal/terminos.html#datos" target="_blank" rel="noopener">política de tratamiento de datos personales</a>.</span>
         </label>
         <p class="field-error hidden" data-error-for="terms"></p>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block span-2">Crear cuenta</button>
+      <button type="submit" class="btn btn-primary btn-block span-2" disabled>Crear cuenta</button>
+      <p class="hint span-2 terms-hint" data-terms-hint>Para crear la cuenta, acepta los términos y condiciones.</p>
     </form>
 
     <!-- ===================== FORMULARIO EMPRESA ===================== -->
@@ -230,6 +231,12 @@
         <input id="c-contact_phone" name="contact_phone" type="tel" class="input" autocomplete="tel" />
         <p class="field-error hidden" data-error-for="contact_phone"></p>
       </div>
+      <div class="field span-2">
+        <label for="c-contact_email" class="label">Correo de contacto <span class="text-muted">(opcional)</span></label>
+        <input id="c-contact_email" name="contact_email" type="email" class="input" autocomplete="email" placeholder="seleccion@miempresa.com" />
+        <p class="hint">Lo verán los aspirantes con los que hagas match. Si lo dejas vacío, se usa el correo de la cuenta.</p>
+        <p class="field-error hidden" data-error-for="contact_email"></p>
+      </div>
 
       <div class="field span-2">
         <label for="c-email" class="label">Correo electrónico de la cuenta</label>
@@ -258,12 +265,13 @@
       <div class="field span-2">
         <label class="checkbox">
           <input type="checkbox" name="terms" />
-          <span>Acepto los términos y condiciones y el tratamiento de datos personales.</span>
+          <span>Acepto los <a href="../legal/terminos.html#terminos" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="../legal/terminos.html#datos" target="_blank" rel="noopener">política de tratamiento de datos personales</a>.</span>
         </label>
         <p class="field-error hidden" data-error-for="terms"></p>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block span-2">Crear cuenta de empresa</button>
+      <button type="submit" class="btn btn-primary btn-block span-2" disabled>Crear cuenta de empresa</button>
+      <p class="hint span-2 terms-hint" data-terms-hint>Para crear la cuenta, acepta los términos y condiciones.</p>
     </form>
 
     <p class="auth-footer">

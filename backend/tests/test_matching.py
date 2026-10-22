@@ -57,3 +57,8 @@ def test_remote_job_counts_as_location_match_anywhere():
     far, _, _ = compute_score(ctx(city_id=2), job(modality="presencial", city_id=1))
     assert near == remote > far
     assert "Trabajo 100% remoto" in reasons
+
+
+def test_years_use_decimal_comma():
+    _, reasons, _ = compute_score(ctx(experience_years=5.8), job(min_experience_years=2), audience="empresa")
+    assert "Cumple la experiencia mínima (2 años); registra 5,8 años" in reasons

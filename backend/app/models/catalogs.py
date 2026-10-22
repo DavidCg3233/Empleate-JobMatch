@@ -1,5 +1,5 @@
 """Catálogos de apoyo para el perfil del aspirante."""
-from sqlalchemy import SmallInteger, String
+from sqlalchemy import Boolean, Enum, SmallInteger, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -20,10 +20,17 @@ class Language(Base):
     name: Mapped[str] = mapped_column(String(50), unique=True)
 
 
+SKILL_CATEGORIES = ("tecnica", "herramienta", "blanda")
+
+
 class Skill(Base):
-    """Catálogo que crece con las habilidades que se extraen de las hojas de vida."""
+    """Catálogo de habilidades y herramientas.
+    Las curadas (is_curated) se sugieren en los formularios; el catálogo también crece con lo que
+    escriben aspirantes y empresas o se extrae de las hojas de vida."""
 
     __tablename__ = "skills"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True)
+    category: Mapped[str | None] = mapped_column(Enum(*SKILL_CATEGORIES, name="skill_category_enum"), nullable=True)
+    is_curated: Mapped[bool] = mapped_column(Boolean, default=False)

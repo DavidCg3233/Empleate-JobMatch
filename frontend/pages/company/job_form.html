@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vacante | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/company.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container container-narrow page-main">
+    <p class="mb-1"><a href="jobs.html">← Volver a mis vacantes</a></p>
+    <header class="page-header">
+      <h1 class="page-title" id="form-title">Nueva vacante</h1>
+      <p class="hint" id="form-subtitle">Entre más clara sea la vacante, mejores candidatos te llegarán.</p>
+    </header>
+
+    <div id="error-box" role="alert" class="alert alert-error hidden mb-2"></div>
+    <div id="loading" class="results-empty" hidden><span class="spinner" aria-hidden="true"></span></div>
+
+    <form id="job-form" class="card card-flat form-card" novalidate>
+      <!-- ============ 1. Información básica ============ -->
+      <section class="form-section">
+        <h2 class="form-section-title">1. ¿Qué cargo buscas?</h2>
+        <div class="field">
+          <label for="title" class="label">Nombre del cargo</label>
+          <input id="title" name="title" class="input" maxlength="150" placeholder="Ej: Auxiliar contable, Desarrollador backend" />
+          <p class="field-error hidden" data-error-for="title"></p>
+        </div>
+        <div class="field">
+          <label for="description" class="label">Descripción de la vacante</label>
+          <textarea id="description" name="description" class="textarea" maxlength="5000" rows="6"
+            placeholder="¿Qué hará la persona? ¿Con qué equipo trabajará? ¿Qué ofrece la empresa?"></textarea>
+          <p class="char-count" data-count-for="description" data-min="30"></p>
+          <p class="field-error hidden" data-error-for="description"></p>
+        </div>
+        <div class="field">
+          <label for="requirements" class="label">Requisitos <span class="text-muted">(opcional)</span></label>
+          <textarea id="requirements" name="requirements" class="textarea" maxlength="3000" rows="3"
+            placeholder="Ej: Licencia de conducción, disponibilidad para turnos, certificaciones..."></textarea>
+          <p class="char-count" data-count-for="requirements"></p>
+          <p class="field-error hidden" data-error-for="requirements"></p>
+        </div>
+      </section>
+
+      <!-- ============ 2. Ubicación y contrato ============ -->
+      <section class="form-section">
+        <h2 class="form-section-title">2. Ubicación y contrato</h2>
+        <div class="field">
+          <span class="label" id="modality-label">Modalidad</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="modality-label">
+            <input type="radio" id="mod-presencial" name="modality" value="presencial" checked />
+            <label for="mod-presencial">🏢 Presencial</label>
+            <input type="radio" id="mod-hibrido" name="modality" value="hibrido" />
+            <label for="mod-hibrido">🔀 Híbrido</label>
+            <input type="radio" id="mod-remoto" name="modality" value="remoto" />
+            <label for="mod-remoto">🏠 Remoto</label>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field" id="city-field">
+            <label for="city_id" class="label">Ciudad</label>
+            <select id="city_id" name="city_id" class="select">
+              <option value="">Cargando...</option>
+            </select>
+            <p class="field-error hidden" data-error-for="city_id"></p>
+          </div>
+          <p class="hint span-2" id="remote-hint" hidden>Las vacantes 100% remotas no tienen ciudad: cualquier persona del país puede postularse.</p>
+          <div class="field">
+            <label for="contract_type_id" class="label">Tipo de contrato</label>
+            <select id="contract_type_id" name="contract_type_id" class="select">
+              <option value="">Cargando...</option>
+            </select>
+            <p class="field-error hidden" data-error-for="contract_type_id"></p>
+          </div>
+          <div class="field">
+            <label for="closes_at" class="label">Fecha de cierre <span class="text-muted">(opcional)</span></label>
+            <input id="closes_at" name="closes_at" type="date" class="input" />
+            <p class="field-error hidden" data-error-for="closes_at"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 3. Perfil y salario ============ -->
+      <section class="form-section">
+        <h2 class="form-section-title">3. Perfil y salario</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="min_education_id" class="label">Educación mínima</label>
+            <select id="min_education_id" name="min_education_id" class="select">
+              <option value="">Sin requisito</option>
+            </select>
+            <p class="field-error hidden" data-error-for="min_education_id"></p>
+          </div>
+          <div class="field">
+            <label for="min_experience_years" class="label">Años de experiencia mínima</label>
+            <input id="min_experience_years" name="min_experience_years" type="number" class="input" min="0" max="40" step="1" value="0" />
+            <p class="field-error hidden" data-error-for="min_experience_years"></p>
+          </div>
+          <div class="field">
+            <label for="salary_min" class="label">Salario desde <span class="text-muted">(opcional)</span></label>
+            <div class="money-input">
+              <span class="money-prefix" data-currency-prefix>$</span>
+              <input id="salary_min" name="salary_min" class="input" inputmode="numeric" placeholder="2.000.000" />
+            </div>
+            <p class="field-error hidden" data-error-for="salary_min"></p>
+          </div>
+          <div class="field">
+            <label for="salary_max" class="label">Salario hasta <span class="text-muted">(opcional)</span></label>
+            <div class="money-input">
+              <span class="money-prefix" data-currency-prefix>$</span>
+              <input id="salary_max" name="salary_max" class="input" inputmode="numeric" placeholder="2.800.000" />
+            </div>
+            <p class="field-error hidden" data-error-for="salary_max"></p>
+          </div>
+          <div class="field">
+            <label for="currency" class="label">Moneda</label>
+            <select id="currency" name="currency" class="select">
+              <option value="COP">Pesos colombianos (COP)</option>
+              <option value="USD">Dólares (USD)</option>
+            </select>
+          </div>
+          <p class="hint" id="salary-preview" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- ============ 4. Habilidades ============ -->
+      <section class="form-section">
+        <h2 class="form-section-title">4. Habilidades</h2>
+        <p class="hint">Se usan para calcular qué tan compatible es cada aspirante. Toca una habilidad para marcarla como requerida o deseable.</p>
+        <div class="field">
+          <label for="skill-input" class="label">Agregar habilidad</label>
+          <div class="skill-input-row">
+            <input id="skill-input" class="input" maxlength="100" autocomplete="off" placeholder="Ej: Excel, Atención al cliente, Python" />
+            <button type="button" id="add-skill" class="btn btn-secondary">Agregar</button>
+          </div>
+          <p class="hint" id="skill-count"></p>
+        </div>
+        <div id="skill-list" class="skill-editor-list" aria-live="polite"></div>
+      </section>
+
+      <div class="form-actions" id="form-actions">
+        <!-- "Publicar" va primero en el HTML: es el botón que usa la tecla Enter. El orden visual lo pone el CSS. -->
+        <button type="submit" class="btn btn-primary" data-status="activa" id="publish-btn">Publicar vacante</button>
+        <button type="submit" class="btn btn-outline form-action-secondary" data-status="pausada" id="draft-btn">Guardar sin publicar</button>
+        <a href="jobs.html" class="btn btn-ghost form-action-cancel">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/jobFormController.js"></script>
+</body>
+</html>

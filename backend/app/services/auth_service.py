@@ -7,7 +7,7 @@ import secrets
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -20,7 +20,7 @@ from app.models.applicant_profile import (
     ApplicantLanguage,
     ApplicantSkill,
 )
-from app.models.catalogs import EducationLevel, Language, Skill
+from app.models.catalogs import EducationLevel, Language
 from app.models.city import City
 from app.models.company import Company
 from app.models.industry import Industry
@@ -29,6 +29,7 @@ from app.models.role import Role
 from app.models.user import User
 from app.schemas.auth_schema import RegisterApplicantRequest, RegisterCompanyRequest
 from app.services import cv_parser_service, email_service, storage_service
+from app.services.skill_service import get_or_create_skill_id
 from app.utils.file_validators import validate_cv
 
 logger = logging.getLogger("empleate.auth")
@@ -86,16 +87,6 @@ def _ensure_catalog_ids(db: Session, data: RegisterApplicantRequest) -> None:
         raise _error(400, "Uno de los idiomas seleccionados no existe.")
 
 
-def _get_or_create_skill(db: Session, name: str) -> int:
-    skill_id = db.scalar(select(Skill.id).where(func.lower(Skill.name) == name.lower()))
-    if skill_id is None:
-        skill = Skill(name=name)
-        db.add(skill)
-        db.flush()
-        skill_id = skill.id
-    return skill_id
-
-
 def _save_applicant_profile(db: Session, applicant_id: int, data: RegisterApplicantRequest) -> None:
     """Guarda experiencia, educación, habilidades e idiomas (autocompletados desde el CV)."""
     for exp in data.experiences:
@@ -105,7 +96,7 @@ def _save_applicant_profile(db: Session, applicant_id: int, data: RegisterApplic
 
     seen: set[int] = set()
     for name in data.skills:
-        skill_id = _get_or_create_skill(db, name)
+        skill_id = get_or_create_skill_id(db, name)
         if skill_id not in seen:  # "Python" y "python" cuentan como la misma
             seen.add(skill_id)
             db.add(ApplicantSkill(applicant_id=applicant_id, skill_id=skill_id))
@@ -365,3 +356,15 @@ def get_me(db: Session, user: User) -> dict:
     else:
         name = "Administrador"
     return {"user_id": user.id, "email": user.email, "role": role, "display_name": name}
+
+
+# =====================================================================
+# CAMBIAR CONTRASEÑA (con la sesión iniciada)
+# =====================================================================
+def change_password(db: Session, user: User, current_password: str, new_password: str) -> None:
+    if not verify_password(current_password, user.password_hash):
+        raise _error(400, "La contraseña actual no es correcta.")
+    if verify_password(new_password, user.password_hash):
+        raise _error(400, "La nueva contraseña debe ser diferente a la actual.")
+    user.password_hash = hash_password(new_password)
+    db.commit()

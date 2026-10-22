@@ -70,12 +70,16 @@ CREATE TABLE languages (
   UNIQUE KEY uq_languages_name (name)
 ) ENGINE=InnoDB;
 
-CREATE TABLE skills (                               -- catalogo que crece con lo que extrae la IA
-  id    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name  VARCHAR(100) NOT NULL,
+CREATE TABLE skills (                               -- catalogo de habilidades y herramientas
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name        VARCHAR(100) NOT NULL,
+  category    ENUM('tecnica','herramienta','blanda') NULL,  -- NULL = escrita por un usuario
+  is_curated  TINYINT(1) NOT NULL DEFAULT 0,        -- 1 = del catalogo oficial (se sugiere al escribir)
   PRIMARY KEY (id),
-  UNIQUE KEY uq_skills_name (name)
+  UNIQUE KEY uq_skills_name (name),
+  KEY idx_skills_curated (is_curated)
 ) ENGINE=InnoDB;
+-- El catalogo curado se carga con:  python -m scripts.migrate_skills_catalog  (desde backend/)
 
 -- =====================================================================
 -- 2. USUARIOS Y AUTENTICACION

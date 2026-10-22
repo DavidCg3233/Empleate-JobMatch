@@ -11,8 +11,12 @@ Reglas:
 - "level" de educación debe ser EXACTAMENTE uno de: {levels}.
 - "proficiency" de idiomas: "basico", "intermedio", "avanzado" o "nativo".
   (A1-A2 = basico, B1-B2 = intermedio, C1-C2 = avanzado, lengua materna = nativo).
-- "skills": máximo 25 habilidades concretas y cortas (ej: "Python", "Excel avanzado",
-  "Atención al cliente"). Sin frases largas.
+- "skills": máximo 30 habilidades o herramientas concretas y cortas (máximo 4 palabras cada una,
+  ej: "Python", "Excel avanzado", "Atención al cliente"). Sin frases, sin descripciones y sin repetir
+  la misma habilidad escrita de otra forma. Incluye las tecnologías mencionadas en los proyectos.
+- No repitas experiencias ni estudios. Escribe nombres, cargos e instituciones con mayúscula inicial
+  (no todo en MAYÚSCULAS). No incluyas en "degree" textos como "(Sexto semestre)".
+- Cada idioma una sola vez, con su propio nivel.
 - "summary": resumen profesional de máximo 600 caracteres, en español.
 - "desired_position": el cargo al que apunta la persona (o su cargo más reciente).
 

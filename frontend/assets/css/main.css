@@ -480,3 +480,75 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 1.25rem 0; }
   .language-row { grid-template-columns: 1fr 1fr; }
   .language-row .btn { grid-column: 1 / -1; }
 }
+
+/* ---------- 14. CAMPOS ESPECIALES: dinero y autocompletado ---------- */
+/* Dinero con formato colombiano: "$ 3.000.000" */
+.money-input { position: relative; display: flex; align-items: center; }
+.money-input .money-prefix {
+  position: absolute; left: 0.95rem; font-weight: 700; color: var(--text-muted); pointer-events: none;
+}
+.money-input .input { padding-left: 2.6rem; font-variant-numeric: tabular-nums; }
+
+/* Sugerencias de habilidades y herramientas */
+.autocomplete-host { position: relative; }
+.autocomplete-list {
+  position: absolute; z-index: 60; top: calc(100% + 4px); left: 0; right: 0;
+  margin: 0; padding: 0.3rem; list-style: none; max-height: 260px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.autocomplete-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.55rem 0.75rem; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+}
+.autocomplete-item:hover, .autocomplete-item[aria-selected="true"] { background: var(--primary-soft); color: var(--primary); }
+.autocomplete-tag {
+  flex: none; font-size: 0.7rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: var(--radius-full);
+  background: var(--surface-2); color: var(--text-muted);
+}
+.autocomplete-tag.tag-tecnica { background: var(--primary-soft); color: var(--primary); }
+.autocomplete-tag.tag-herramienta { background: var(--accent-soft); color: var(--accent); }
+.autocomplete-tag.tag-blanda { background: var(--success-soft); color: var(--success); }
+
+/* Registro: aviso mientras no se aceptan los términos */
+.terms-hint { margin: -0.5rem 0 0; text-align: center; }
+.checkbox a { font-weight: 700; }
+
+/* ---------- 15. FORMULARIOS LARGOS (perfil, vacantes): secciones, contadores y acciones ---------- */
+.form-card { padding: 1.5rem; }
+.form-section { display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+.form-section:last-of-type { border-bottom: 0; margin-bottom: 0; }
+.form-section-title { font-size: 1.05rem; margin: 0; }
+.form-section-title + .hint { margin: -0.6rem 0 0; }
+.char-count { font-size: 0.78rem; color: var(--text-muted); text-align: right; margin: 0; }
+.char-count.is-over { color: var(--danger); font-weight: 700; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem; }
+.form-actions .form-action-cancel { order: -2; }
+.form-actions .form-action-secondary { order: -1; }
+.input[readonly] { background: var(--surface-2); color: var(--text-muted); cursor: not-allowed; }
+.select.is-invalid, .textarea.is-invalid { border-color: var(--danger); }
+
+/* ---------- 16. PERFIL DEL ASPIRANTE ---------- */
+.cv-current p { margin: 0; }
+.cv-review {
+  display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem 1.1rem;
+  border-radius: var(--radius); background: var(--primary-soft); border: 1px solid var(--primary);
+}
+.cv-review p { margin: 0; }
+/* Barra de guardar siempre visible al final de la pantalla mientras se edita */
+.save-bar {
+  position: sticky; bottom: 0; z-index: 5; align-items: center;
+  margin: 1.25rem -1.5rem -1.5rem; padding: 0.85rem 1.5rem;
+  background: var(--surface); border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.save-bar .hint { margin: 0 auto 0 0; color: var(--warning); font-weight: 700; }
+@media (max-width: 720px) {
+  .save-bar { bottom: calc(4.1rem + env(safe-area-inset-bottom, 0px)); }
+}
+/* Los avisos emergentes no tapan la barra de guardar ni el menú inferior del celular */
+body:has(.save-bar) .toast-container { bottom: 5.5rem; }
+@media (max-width: 720px) {
+  body.has-bottom-nav .toast-container { bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+  body.has-bottom-nav:has(.save-bar) .toast-container { bottom: calc(9.5rem + env(safe-area-inset-bottom, 0px)); }
+}

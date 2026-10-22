@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil de la empresa | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/company.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container container-narrow page-main">
+    <header class="page-header">
+      <h1 class="page-title">Perfil de la empresa</h1>
+      <p class="hint">Así te ven los aspirantes en el detalle de cada vacante. Mantenlo actualizado.</p>
+    </header>
+
+    <div id="error-box" role="alert" class="alert alert-error hidden mb-2"></div>
+    <div id="loading" class="results-empty"><span class="spinner" aria-hidden="true"></span></div>
+
+    <form id="profile-form" class="card card-flat form-card" novalidate hidden>
+      <section class="form-section">
+        <h2 class="form-section-title">Datos de la empresa</h2>
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="name" class="label">Nombre de la empresa</label>
+            <input id="name" name="name" class="input" maxlength="150" autocomplete="organization" />
+            <p class="field-error hidden" data-error-for="name"></p>
+          </div>
+          <div class="field">
+            <label for="tax_id" class="label">NIT</label>
+            <input id="tax_id" class="input" readonly aria-describedby="tax-hint" />
+            <p class="hint" id="tax-hint">El NIT no se puede cambiar.</p>
+          </div>
+          <div class="field">
+            <label for="industry_id" class="label">Sector</label>
+            <select id="industry_id" name="industry_id" class="select"></select>
+            <p class="field-error hidden" data-error-for="industry_id"></p>
+          </div>
+          <div class="field">
+            <label for="size" class="label">Tamaño</label>
+            <select id="size" name="size" class="select">
+              <option value="1-10">1 a 10 empleados</option>
+              <option value="11-50">11 a 50 empleados</option>
+              <option value="51-200">51 a 200 empleados</option>
+              <option value="201-500">201 a 500 empleados</option>
+              <option value="501-1000">501 a 1000 empleados</option>
+              <option value="1000+">Más de 1000 empleados</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="city_id" class="label">Ciudad</label>
+            <select id="city_id" name="city_id" class="select"></select>
+            <p class="field-error hidden" data-error-for="city_id"></p>
+          </div>
+          <div class="field">
+            <label for="address" class="label">Dirección <span class="text-muted">(opcional)</span></label>
+            <input id="address" name="address" class="input" maxlength="255" autocomplete="street-address" />
+            <p class="field-error hidden" data-error-for="address"></p>
+          </div>
+          <div class="field">
+            <label for="website" class="label">Sitio web <span class="text-muted">(opcional)</span></label>
+            <input id="website" name="website" class="input" maxlength="255" placeholder="miempresa.com" autocomplete="url" />
+            <p class="field-error hidden" data-error-for="website"></p>
+          </div>
+          <div class="field span-2">
+            <label for="description" class="label">Descripción <span class="text-muted">(opcional)</span></label>
+            <textarea id="description" name="description" class="textarea" maxlength="2000" rows="4"
+              placeholder="Cuéntales a los aspirantes quiénes son, qué hacen y por qué es bueno trabajar con ustedes."></textarea>
+            <p class="char-count" data-count-for="description"></p>
+            <p class="field-error hidden" data-error-for="description"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="form-section-title">Contacto para los matches</h2>
+        <p class="hint">Estos datos los ve el aspirante solo cuando hay match.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="contact_name" class="label">Persona de contacto</label>
+            <input id="contact_name" name="contact_name" class="input" maxlength="150" autocomplete="name" />
+            <p class="field-error hidden" data-error-for="contact_name"></p>
+          </div>
+          <div class="field">
+            <label for="contact_phone" class="label">Teléfono <span class="text-muted">(opcional)</span></label>
+            <input id="contact_phone" name="contact_phone" type="tel" class="input" autocomplete="tel" />
+            <p class="field-error hidden" data-error-for="contact_phone"></p>
+          </div>
+          <div class="field span-2">
+            <label for="contact_email" class="label">Correo de contacto</label>
+            <input id="contact_email" name="contact_email" type="email" class="input" autocomplete="email" />
+            <p class="field-error hidden" data-error-for="contact_email"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="form-section-title">Cuenta</h2>
+        <div class="field">
+          <label for="account_email" class="label">Correo para iniciar sesión</label>
+          <input id="account_email" class="input" readonly />
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="save-btn">Guardar cambios</button>
+      </div>
+    </form>
+
+    <section class="card card-flat form-card stack mt-2" aria-labelledby="password-title" id="password-section" hidden>
+      <h2 class="form-section-title" id="password-title">Cambiar contraseña</h2>
+      <div id="password-box"></div>
+    </section>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/companyProfileController.js"></script>
+</body>
+</html>

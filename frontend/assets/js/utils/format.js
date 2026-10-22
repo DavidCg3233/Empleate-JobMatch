@@ -2,6 +2,41 @@
 
 export const MODALITY_LABEL = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
 
+export const COMPANY_SIZE_LABEL = {
+  "1-10": "1 a 10 empleados", "11-50": "11 a 50 empleados", "51-200": "51 a 200 empleados",
+  "201-500": "201 a 500 empleados", "501-1000": "501 a 1000 empleados", "1000+": "Más de 1000 empleados",
+};
+
+/** Estado que ve la empresa: "Deshabilitada" y "Vencida" tienen prioridad sobre el estado guardado. */
+export function jobStatusInfo(job) {
+  if (!job.is_enabled) return { label: "Deshabilitada", tone: "danger" };
+  if (job.status === "cerrada") return { label: "Cerrada", tone: "neutral" };
+  if (job.is_expired) return { label: "Vencida", tone: "warning" };
+  if (job.status === "pausada") return { label: "Pausada", tone: "warning" };
+  return { label: "Activa", tone: "success" };
+}
+
+/** 3.5 -> "3,5 años" · 1 -> "1 año" · 0 -> "Sin experiencia" */
+export function formatYears(years) {
+  if (!years) return "Sin experiencia";
+  const text = Number.isInteger(years) ? String(years) : years.toLocaleString("es-CO", { maximumFractionDigits: 1 });
+  return years === 1 ? "1 año" : `${text} años`;
+}
+
+/** "2022-03-01" -> "mar. 2022" */
+export function formatMonthYear(isoDate) {
+  if (!isoDate) return "";
+  const [y, m] = String(isoDate).slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("es-CO", { month: "short", year: "numeric" });
+}
+
+export function formatPeriod(start, end, isCurrent = false) {
+  const from = formatMonthYear(start);
+  const to = isCurrent ? "actualidad" : formatMonthYear(end);
+  if (from && to) return `${from} – ${to}`;
+  return from || to || "";
+}
+
 export function formatMoney(value, currency = "COP") {
   try {
     return new Intl.NumberFormat("es-CO", { style: "currency", currency, maximumFractionDigits: 0 }).format(value);

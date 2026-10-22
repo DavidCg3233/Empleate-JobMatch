@@ -37,3 +37,11 @@ export function validateResetToken(token) {
 export function resetPassword(token, password) {
   return http("/auth/reset-password", { method: "POST", body: { token, password }, auth: false });
 }
+
+// ---------- Contraseña (con la sesión iniciada) ----------
+export function changePassword(currentPassword, newPassword) {
+  return http("/auth/change-password", {
+    method: "POST",
+    body: { current_password: currentPassword, new_password: newPassword },
+  });
+}

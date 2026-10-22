@@ -78,3 +78,31 @@ def cleanup_temp() -> None:
                 file.unlink()
         except OSError:
             pass  # si no se puede borrar ahora, se intentará la próxima vez
+
+
+# ---------------- Hoja de vida definitiva (perfil del aspirante) ----------------
+def save_cv(content: bytes, ext: str) -> str:
+    """Guarda una hoja de vida en cvs/ y devuelve la ruta relativa que se guarda en la BD."""
+    name = f"{uuid.uuid4().hex}{ext}"
+    (_dir("cvs") / name).write_bytes(content)
+    return f"cvs/{name}"
+
+
+def resolve_upload(relative_path: str | None) -> Path | None:
+    """Ruta absoluta de un archivo subido, solo si existe y está dentro de uploads/ (evita rutas maliciosas)."""
+    if not relative_path:
+        return None
+    base = Path(settings.UPLOAD_DIR).resolve()
+    path = (base / relative_path).resolve()
+    if base not in path.parents or not path.is_file():
+        return None
+    return path
+
+
+def delete_upload(relative_path: str | None) -> None:
+    path = resolve_upload(relative_path)
+    if path is not None:
+        try:
+            path.unlink()
+        except OSError:
+            pass  # si no se puede borrar ahora (archivo en uso), no afecta al usuario

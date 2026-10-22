@@ -1,16 +1,13 @@
 // Ventana con el detalle completo de una vacante.
 // openJobDetail(job, { onAction: async (action) => {...} })  -> devuelve la función para cerrarla.
 // Si se pasa onAction, se muestran los botones "No me interesa" / "Me interesa".
+import { openModal } from "./modal.js";
 import { skillChips } from "./swipecard.js";
 import { el } from "../utils/dom.js";
 import {
-  MODALITY_LABEL, formatDate, formatExperience, formatLocation, formatSalary, initials, scoreClass, timeAgo,
+  COMPANY_SIZE_LABEL, MODALITY_LABEL, formatDate, formatExperience, formatLocation, formatSalary, initials, scoreClass, timeAgo,
 } from "../utils/format.js";
 
-const SIZE_LABEL = {
-  "1-10": "1 a 10 empleados", "11-50": "11 a 50 empleados", "51-200": "51 a 200 empleados",
-  "201-500": "201 a 500 empleados", "501-1000": "501 a 1000 empleados", "1000+": "Más de 1000 empleados",
-};
 
 function section(title, ...content) {
   return el("section", { class: "detail-section" }, el("h3", { class: "card-section-title", textContent: title }), ...content);
@@ -21,10 +18,7 @@ function infoRow(label, value) {
 }
 
 export function openJobDetail(job, { onAction } = {}) {
-  const previousFocus = document.activeElement;
   const titleId = `job-detail-title-${job.id}`;
-
-  const closeBtn = el("button", { type: "button", class: "modal-close", "aria-label": "Cerrar", textContent: "×" });
 
   // ---------- Contenido ----------
   const required = job.skills.filter((s) => s.is_required);
@@ -70,7 +64,7 @@ export function openJobDetail(job, { onAction } = {}) {
     section("Descripción", el("p", { class: "detail-text", textContent: job.description })),
     job.requirements ? section("Requisitos", el("p", { class: "detail-text", textContent: job.requirements })) : null,
     section(`Sobre ${company.name}`,
-      el("p", { class: "hint", textContent: [company.industry, SIZE_LABEL[company.size], company.city].filter(Boolean).join(" · ") }),
+      el("p", { class: "hint", textContent: [company.industry, COMPANY_SIZE_LABEL[company.size], company.city].filter(Boolean).join(" · ") }),
       company.description ? el("p", { class: "detail-text", textContent: company.description }) : null,
       website ? el("a", { href: website, target: "_blank", rel: "noopener noreferrer", textContent: "Visitar sitio web ↗" }) : null,
     ),
@@ -104,36 +98,5 @@ export function openJobDetail(job, { onAction } = {}) {
     footer = el("div", { class: "modal-footer" }, dislikeBtn, likeBtn);
   }
 
-  const modal = el("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-labelledby": titleId },
-    closeBtn, body, footer,
-  );
-  const overlay = el("div", { class: "modal-overlay" }, modal);
-
-  // ---------- Abrir / cerrar ----------
-  function close() {
-    document.removeEventListener("keydown", onKey);
-    overlay.remove();
-    document.body.classList.remove("modal-open");
-    if (previousFocus && typeof previousFocus.focus === "function") previousFocus.focus();
-  }
-
-  function onKey(e) {
-    if (e.key === "Escape") close();
-    if (e.key === "Tab") { // el foco no se sale de la ventana
-      const focusable = modal.querySelectorAll("button:not([disabled]), a[href]");
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    }
-  }
-
-  closeBtn.addEventListener("click", close);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-  document.addEventListener("keydown", onKey);
-
-  document.body.append(overlay);
-  document.body.classList.add("modal-open");
-  closeBtn.focus();
-  return close;
+  return openModal({ labelledBy: titleId, body, footer });
 }

@@ -1,11 +1,12 @@
 // Editor del perfil profesional del aspirante (experiencia, educación, habilidades, idiomas).
 // Se llena automáticamente con los datos de la hoja de vida y el usuario puede corregirlos.
 // Todo se construye con createElement/textContent (nunca innerHTML con datos del usuario).
+import { attachSkillAutocomplete } from "./skillAutocomplete.js";
 
 const PROFICIENCY = [
   ["basico", "Básico"], ["intermedio", "Intermedio"], ["avanzado", "Avanzado"], ["nativo", "Nativo"],
 ];
-const MAX_SKILLS = 25;
+const MAX_SKILLS = 40;
 
 // ---------- Utilidades ----------
 function el(tag, props = {}, ...children) {
@@ -176,6 +177,7 @@ export function createProfileEditor(root) {
     skillInput.value = "";
   }
 
+  attachSkillAutocomplete(skillInput, { onSelect: addSkill, getExisting: () => skills });
   skillInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addSkillFromInput(); }  // Enter NO envía el formulario
   });

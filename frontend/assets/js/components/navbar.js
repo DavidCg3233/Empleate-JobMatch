@@ -1,13 +1,22 @@
-// Barra de navegación del aspirante (arriba en escritorio, abajo en el celular).
-// Uso: renderApplicantNav("swipe" | "search" | "matches")
+// Barra de navegación de las pantallas con sesión (arriba en escritorio, abajo en el celular).
+// Uso: renderNav("empresa", "jobs")  ·  renderApplicantNav("swipe")
 import { getMe } from "../api/authApi.js";
 import { logout } from "../utils/auth.js";
 
-const LINKS = [
-  { key: "swipe", href: "swipe.html", icon: "🧭", label: "Explorar" },
-  { key: "search", href: "search.html", icon: "🔎", label: "Buscar" },
-  { key: "matches", href: "matches.html", icon: "💚", label: "Mis matches" },
-];
+const LINKS = {
+  aspirante: [
+    { key: "swipe", href: "swipe.html", icon: "🧭", label: "Explorar" },
+    { key: "search", href: "search.html", icon: "🔎", label: "Buscar" },
+    { key: "matches", href: "matches.html", icon: "💚", label: "Mis matches" },
+    { key: "profile", href: "profile.html", icon: "👤", label: "Mi perfil" },
+  ],
+  empresa: [
+    { key: "jobs", href: "jobs.html", icon: "📋", label: "Vacantes" },
+    { key: "swipe", href: "swipe.html", icon: "🧭", label: "Candidatos" },
+    { key: "matches", href: "matches.html", icon: "💚", label: "Matches" },
+    { key: "profile", href: "company.html", icon: "🏢", label: "Empresa" },
+  ],
+};
 
 function link({ key, href, icon, label }, active, withIcon) {
   const a = document.createElement("a");
@@ -27,23 +36,25 @@ function link({ key, href, icon, label }, active, withIcon) {
   return a;
 }
 
-export function renderApplicantNav(active) {
+export function renderNav(role, active) {
+  const links = LINKS[role];
+
   const header = document.createElement("header");
   header.className = "navbar";
   const inner = document.createElement("div");
   inner.className = "navbar-inner";
 
   const brand = document.createElement("a");
-  brand.href = "swipe.html";
+  brand.href = links[0].href;
   brand.className = "brand brand-sm";
   const span = document.createElement("span");
   span.textContent = "Jobmatch";
   brand.append("Empléate ", span);
 
-  const links = document.createElement("nav");
-  links.className = "nav-links";
-  links.setAttribute("aria-label", "Secciones");
-  LINKS.forEach((l) => links.append(link(l, active, false)));
+  const nav = document.createElement("nav");
+  nav.className = "nav-links";
+  nav.setAttribute("aria-label", "Secciones");
+  links.forEach((l) => nav.append(link(l, active, false)));
 
   const user = document.createElement("div");
   user.className = "nav-user";
@@ -62,18 +73,22 @@ export function renderApplicantNav(active) {
   out.addEventListener("click", logout);
   user.append(name, theme, out);
 
-  inner.append(brand, links, user);
+  inner.append(brand, nav, user);
   header.append(inner);
 
   const bottom = document.createElement("nav");
   bottom.className = "bottom-nav";
   bottom.setAttribute("aria-label", "Secciones");
-  LINKS.forEach((l) => bottom.append(link(l, active, true)));
+  links.forEach((l) => bottom.append(link(l, active, true)));
 
   document.body.prepend(header);
   document.body.append(bottom);
   document.body.classList.add("has-bottom-nav");
 
-  // Nombre real del usuario (si falla, se queda el correo)
+  // Nombre real del usuario o de la empresa (si falla, se queda el correo)
   getMe().then((me) => { name.textContent = me.display_name; }).catch(() => {});
+}
+
+export function renderApplicantNav(active) {
+  renderNav("aspirante", active);
 }

@@ -1,5 +1,5 @@
-"""Catálogos públicos que necesitan los formularios (ciudades, sectores, educación, idiomas, contratos)."""
-from fastapi import APIRouter, Depends
+"""Catálogos públicos que necesitan los formularios (ciudades, sectores, educación, idiomas, contratos, habilidades)."""
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -8,7 +8,8 @@ from app.models.catalogs import EducationLevel, Language
 from app.models.city import City, Department
 from app.models.industry import Industry
 from app.models.job import ContractType
-from app.schemas.catalog_schema import CatalogItemOut, CityOut, IndustryOut
+from app.schemas.catalog_schema import CatalogItemOut, CityOut, IndustryOut, SkillSuggestionOut
+from app.services import skill_service
 
 router = APIRouter(prefix="/api/catalogs", tags=["Catálogos"])
 
@@ -45,3 +46,13 @@ def list_languages(db: Session = Depends(get_db)):
 def list_contract_types(db: Session = Depends(get_db)):
     rows = db.execute(select(ContractType.id, ContractType.name).order_by(ContractType.id)).all()
     return [{"id": r.id, "name": r.name} for r in rows]
+
+
+@router.get("/skills", response_model=list[SkillSuggestionOut])
+def suggest_skills(
+    q: str = Query(min_length=1, max_length=60),
+    limit: int = Query(default=8, ge=1, le=20),
+    db: Session = Depends(get_db),
+):
+    """Sugerencias para autocompletar habilidades y herramientas (sin importar tildes ni mayúsculas)."""
+    return skill_service.suggest_skills(db, q, limit)

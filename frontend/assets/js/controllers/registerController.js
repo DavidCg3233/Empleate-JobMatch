@@ -17,6 +17,8 @@ const profileEditor = createProfileEditor(document.getElementById("profile-edito
 
 // Hoja de vida
 const MAX_CV_MB = 5;
+const CV_EXTENSIONS = ["pdf", "docx", "odt", "rtf", "txt"];
+const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "heic", "gif"];
 const cvInput = document.getElementById("cv-file");
 const cvDrop = document.getElementById("cv-drop");
 const cvStatus = document.getElementById("cv-status");
@@ -48,6 +50,7 @@ const RULES = {
     ["website", websiteError],
     ["contact_name", minLengthError("Escribe el nombre de la persona de contacto.", 2)],
     ["contact_phone", phoneError],
+    ["contact_email", (v) => (v ? emailError(v) : "")], // opcional
     ...ACCOUNT_RULES,
   ],
 };
@@ -110,6 +113,7 @@ function buildPayload(role, v) {
       password: v.password,
       phone: orNull(v.phone),
       city_id: Number(v.city_id),
+      accept_terms: v.terms,
       cv_upload_id: cvUploadId,
       desired_position: orNull(v.desired_position),
       summary: orNull(v.summary),
@@ -127,9 +131,10 @@ function buildPayload(role, v) {
     website: orNull(v.website),
     contact_name: v.contact_name,
     contact_phone: orNull(v.contact_phone),
-    contact_email: null,
+    contact_email: orNull(v.contact_email),
     email: v.email,
     password: v.password,
+    accept_terms: v.terms,
   };
 }
 
@@ -189,10 +194,12 @@ async function handleCvFile(file) {
   if (!file) return;
   hideMessages();
   const ext = file.name.split(".").pop().toLowerCase();
-  if (!["pdf", "docx"].includes(ext)) {
+  if (!CV_EXTENSIONS.includes(ext)) {
     setCvStatus("error", ext === "doc"
       ? "El formato .doc antiguo no es compatible. Guárdalo como .docx o PDF."
-      : "Solo se aceptan archivos PDF o Word (.docx).");
+      : IMAGE_EXTENSIONS.includes(ext)
+        ? "Subiste una imagen. Sube la hoja de vida en PDF o Word para poder leer su texto."
+        : "Formatos aceptados: PDF, Word (.docx), OpenDocument (.odt), RTF o texto (.txt).");
     return;
   }
   if (file.size > MAX_CV_MB * 1024 * 1024) {
@@ -294,13 +301,24 @@ document.querySelectorAll("[data-toggle-password]").forEach((btn) => {
   });
 });
 
+// El botón "Crear cuenta" solo se activa cuando se aceptan los términos y condiciones
+function syncTerms(form) {
+  const accepted = form.elements.terms.checked;
+  form.querySelector('button[type="submit"]').disabled = !accepted;
+  form.querySelector("[data-terms-hint]").hidden = accepted;
+}
+
 Object.entries(forms).forEach(([role, form]) => {
   // Al escribir, se limpia el error de ese campo
   form.addEventListener("input", (e) => {
     e.target.classList?.remove("is-autofilled");
     if (e.target.name) setFieldError(form, e.target.name, "");
   });
-  form.addEventListener("change", (e) => e.target.name && setFieldError(form, e.target.name, ""));
+  form.addEventListener("change", (e) => {
+    if (e.target.name) setFieldError(form, e.target.name, "");
+    if (e.target.name === "terms") syncTerms(form);
+  });
+  syncTerms(form);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -334,8 +352,8 @@ Object.entries(forms).forEach(([role, form]) => {
         if (/hoja de vida/i.test(err.message)) { cvUploadId = null; cvStatus.classList.add("hidden"); }
         showGlobalError(err.message);
       }
-      submitBtn.disabled = false;
       submitBtn.textContent = originalText;
+      syncTerms(form);
     }
   });
 });

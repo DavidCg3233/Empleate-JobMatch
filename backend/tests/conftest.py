@@ -8,9 +8,10 @@ from sqlalchemy.pool import StaticPool
 
 import app.models as m
 from app.config import settings
-from app.controllers import auth_controller
+from app.controllers import applicant_controller, auth_controller
 from app.database import Base, get_db
 from app.services import email_service
+from app.services.skill_service import seed_curated_skills
 from main import app
 
 # test_db.py es un script manual para probar MySQL (python tests/test_db.py), no una prueba de pytest
@@ -34,6 +35,7 @@ def db_session(tmp_path, monkeypatch):
         s.add_all([m.EducationLevel(id=i, name=n, rank_order=i) for i, n in enumerate(levels, 1)])
         s.add_all([m.Language(id=1, name="Español"), m.Language(id=2, name="Inglés")])
         s.add_all([m.ContractType(id=1, name="Término indefinido"), m.ContractType(id=2, name="Término fijo")])
+        seed_curated_skills(s)  # catálogo de habilidades y herramientas
         s.commit()
 
     monkeypatch.setattr(settings, "UPLOAD_DIR", tmp_path / "uploads")
@@ -60,7 +62,7 @@ def client(db_session, sent_emails):
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
-    for limiter in (auth_controller.cv_limiter, auth_controller.forgot_limiter):
+    for limiter in (auth_controller.cv_limiter, auth_controller.forgot_limiter, applicant_controller.cv_limiter):
         limiter._hits.clear()
     with TestClient(app) as c:
         yield c

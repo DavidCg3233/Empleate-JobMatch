@@ -14,3 +14,9 @@ class IndustryOut(BaseModel):
 class CatalogItemOut(BaseModel):
     id: int
     name: str
+
+
+class SkillSuggestionOut(BaseModel):
+    id: int
+    name: str
+    category: str | None  # tecnica | herramienta | blanda | None (escrita por un usuario)

@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.applicant_schema import CvParseResponse
 from app.schemas.auth_schema import (
+    ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
     LoginResponse,
@@ -81,3 +82,10 @@ def validate_reset_token(token: str = Query(min_length=20, max_length=200), db: 
 def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
     auth_service.reset_password(db, data.token, data.password)
     return {"message": "Tu contraseña se actualizó. Ya puedes iniciar sesión."}
+
+
+@router.post("/change-password", response_model=MessageResponse)
+def change_password(data: ChangePasswordRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Cambia la contraseña de quien tiene la sesión iniciada (aspirante o empresa)."""
+    auth_service.change_password(db, user, data.current_password, data.new_password)
+    return {"message": "Tu contraseña se actualizó."}

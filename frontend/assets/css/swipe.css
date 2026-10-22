@@ -146,7 +146,8 @@
 .match-item:hover { border-color: var(--primary); }
 
 /* =====================================================================
-   Búsqueda de vacantes del aspirante (Explorar, Buscar y Mis matches)
+   Pantallas con sesión (aspirante y empresa): navegación, tarjetas,
+   ventanas de detalle, listas, pestañas y matches
    ===================================================================== */
 
 /* ---------- Navegación ---------- */
@@ -223,6 +224,7 @@ body.modal-open { overflow: hidden; }
 .modal-close:hover { color: var(--text); background: var(--border); }
 .modal-footer { display: flex; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
 .modal-footer .btn { flex: 1; }
+.modal.modal-sm { max-width: 440px; }
 .btn[aria-pressed="true"].btn-primary { background: var(--success); }
 .btn[aria-pressed="true"].btn-danger { border-color: var(--danger); }
 @media (max-width: 560px) {
@@ -312,11 +314,17 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ---------- Mis matches ---------- */
-.tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
-.tab {
-  font: inherit; font-weight: 700; color: var(--text-muted); cursor: pointer;
-  background: none; border: 0; border-bottom: 3px solid transparent; padding: 0.6rem 1rem; margin-bottom: -1px;
+.tabs {
+  display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem;
+  overflow-x: auto; scrollbar-width: none; /* en pantallas angostas las pestañas se deslizan */
 }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: none; white-space: nowrap;
+  font: inherit; font-weight: 700; color: var(--text-muted); cursor: pointer;
+  background: none; border: 0; border-bottom: 3px solid transparent; padding: 0.6rem 1rem;
+}
+@media (max-width: 560px) { .tab { padding: 0.6rem 0.7rem; } }
 .tab:hover { color: var(--text); }
 .tab[aria-selected="true"] { color: var(--primary); border-bottom-color: var(--primary); }
 .tab-count { font-weight: 600; }

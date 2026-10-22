@@ -12,7 +12,7 @@ PASSWORD = "Clave1234"
 def register_company(client, **overrides):
     payload = {
         "name": "Talento Andino", "tax_id": "900.123.456-7", "industry_id": 1, "size": "11-50",
-        "city_id": 2, "contact_name": "Ana Ruiz", "email": "rrhh@talento.com", "password": PASSWORD,
+        "city_id": 2, "contact_name": "Ana Ruiz", "email": "rrhh@talento.com", "password": PASSWORD, "accept_terms": True,
     }
     payload.update(overrides)
     return client.post("/api/auth/register/company", json=payload)
@@ -20,7 +20,7 @@ def register_company(client, **overrides):
 
 def register_applicant(client, **overrides):
     payload = {"first_name": "Pedro", "last_name": "Pérez", "email": "pedro@correo.com",
-               "password": PASSWORD, "city_id": 1}
+               "password": PASSWORD, "accept_terms": True, "city_id": 1}
     payload.update(overrides)
     return client.post("/api/auth/register/applicant", json=payload)
 
@@ -42,7 +42,7 @@ def test_cv_parse_then_register_applicant(client, db_session):
     # El formulario se envía con los datos autocompletados (igual que registerController.js)
     payload = {
         "first_name": data["first_name"], "last_name": data["last_name"], "email": data["email"],
-        "password": PASSWORD, "phone": data["phone"], "city_id": data["city_id"],
+        "password": PASSWORD, "accept_terms": True, "phone": data["phone"], "city_id": data["city_id"],
         "cv_upload_id": parsed["cv_upload_id"], "desired_position": data["desired_position"],
         "summary": data["summary"], "skills": data["skills"] + ["python"],  # duplicado a propósito
         "experiences": data["experiences"], "educations": data["educations"], "languages": data["languages"],
@@ -69,8 +69,12 @@ def test_cv_parse_then_register_applicant(client, db_session):
 
 
 def test_cv_parse_rejects_invalid_files(client):
-    r = client.post("/api/auth/cv/parse", files={"file": ("cv.txt", b"hola", "text/plain")})
+    r = client.post("/api/auth/cv/parse", files={"file": ("cv.exe", b"MZ...", "application/octet-stream")})
     assert r.status_code == 400
+    r = client.post("/api/auth/cv/parse", files={"file": ("foto.jpg", b"\xff\xd8\xff", "image/jpeg")})
+    assert r.status_code == 400 and "imagen" in r.json()["detail"]["message"]
+    r = client.post("/api/auth/cv/parse", files={"file": ("cv.txt", b"hola", "text/plain")})
+    assert r.status_code == 422  # .txt sí se acepta, pero no tiene texto suficiente
     r = client.post("/api/auth/cv/parse", files={"file": ("cv.pdf", b"PK\x03\x04falso", "application/pdf")})
     assert r.status_code == 400
     big = b"%PDF" + b"0" * (settings.MAX_CV_MB * 1024 * 1024)

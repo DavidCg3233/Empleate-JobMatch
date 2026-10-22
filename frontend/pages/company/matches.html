@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matches | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/company.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container container-narrow page-main">
+    <header class="page-header">
+      <h1 class="page-title">Matches</h1>
+      <p class="hint">Aspirantes a los que les interesa tu vacante y a ti su perfil. Contáctalos para seguir con el proceso.</p>
+    </header>
+
+    <div class="match-filter">
+      <label for="job-filter" class="label">Vacante:</label>
+      <select id="job-filter" class="select">
+        <option value="">Todas las vacantes</option>
+      </select>
+      <span class="hint" id="match-count" aria-live="polite"></span>
+    </div>
+
+    <section id="match-list" class="match-list" aria-live="polite">
+      <div class="results-empty"><span class="spinner" aria-hidden="true"></span></div>
+    </section>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/companyMatchesController.js"></script>
+</body>
+</html>

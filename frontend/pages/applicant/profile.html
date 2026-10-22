@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi perfil | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container container-narrow page-main">
+    <header class="page-header">
+      <h1 class="page-title">Mi perfil</h1>
+      <p class="hint">Mantén tu perfil al día: con él calculamos tu compatibilidad con cada vacante y es lo que ven las empresas.</p>
+    </header>
+
+    <div id="error-box" role="alert" class="alert alert-error hidden mb-2"></div>
+    <div id="loading" class="results-empty"><span class="spinner" aria-hidden="true"></span></div>
+
+    <div id="profile-content" class="stack" hidden>
+      <p id="completion" class="alert" role="status"></p>
+
+      <!-- ============ Hoja de vida ============ -->
+      <section class="card card-flat form-card stack" aria-labelledby="cv-title">
+        <h2 class="form-section-title" id="cv-title">Hoja de vida</h2>
+        <div id="cv-current" class="cv-current"></div>
+        <label for="cv-file" id="cv-drop" class="file-drop" tabindex="0">
+          <span class="file-drop-icon" aria-hidden="true">📄</span>
+          <strong>Subir una hoja de vida actualizada</strong>
+          <span class="hint">PDF, Word (.docx), OpenDocument (.odt), RTF o texto · máximo 5 MB · Reemplaza la anterior</span>
+        </label>
+        <input id="cv-file" type="file" class="hidden"
+          accept=".pdf,.docx,.odt,.rtf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/plain" />
+        <div id="cv-status" class="cv-status hidden" role="status" aria-live="polite">
+          <span class="cv-status-icon"></span>
+          <span class="cv-status-text"></span>
+        </div>
+        <div id="cv-review" class="cv-review" hidden></div>
+      </section>
+
+      <form id="profile-form" class="card card-flat form-card" novalidate>
+        <!-- ============ Datos personales ============ -->
+        <section class="form-section">
+          <h2 class="form-section-title">Datos personales</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label for="first_name" class="label">Nombre</label>
+              <input id="first_name" name="first_name" class="input" maxlength="100" autocomplete="given-name" />
+              <p class="field-error hidden" data-error-for="first_name"></p>
+            </div>
+            <div class="field">
+              <label for="last_name" class="label">Apellido</label>
+              <input id="last_name" name="last_name" class="input" maxlength="100" autocomplete="family-name" />
+              <p class="field-error hidden" data-error-for="last_name"></p>
+            </div>
+            <div class="field">
+              <label for="phone" class="label">Teléfono <span class="text-muted">(opcional)</span></label>
+              <input id="phone" name="phone" type="tel" class="input" autocomplete="tel" placeholder="300 123 4567" />
+              <p class="field-error hidden" data-error-for="phone"></p>
+            </div>
+            <div class="field">
+              <label for="city_id" class="label">Ciudad</label>
+              <select id="city_id" name="city_id" class="select"></select>
+              <p class="field-error hidden" data-error-for="city_id"></p>
+            </div>
+            <div class="field span-2">
+              <label for="account_email" class="label">Correo de la cuenta</label>
+              <input id="account_email" class="input" readonly />
+              <p class="hint">Las empresas lo ven solo cuando hay match.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Lo que buscas ============ -->
+        <section class="form-section">
+          <h2 class="form-section-title">Lo que buscas</h2>
+          <label class="switch">
+            <input type="checkbox" id="search_status" name="search_status" />
+            <span class="switch-track" aria-hidden="true"></span>
+            <span><strong>Estoy buscando empleo</strong>
+              <span class="hint" style="display:block">Si lo desactivas, las empresas dejan de ver tu perfil como sugerido (tus matches se conservan).</span></span>
+          </label>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="desired_position" class="label">Cargo que buscas</label>
+              <input id="desired_position" name="desired_position" class="input" maxlength="150" placeholder="Ej: Desarrollador backend, Auxiliar contable" />
+              <p class="field-error hidden" data-error-for="desired_position"></p>
+            </div>
+            <div class="field">
+              <label for="desired_salary_min" class="label">Aspiración salarial mínima <span class="text-muted">(opcional)</span></label>
+              <div class="money-input">
+                <span class="money-prefix">$</span>
+                <input id="desired_salary_min" name="desired_salary_min" class="input" placeholder="2.500.000" />
+              </div>
+              <p class="hint">En pesos colombianos (COP), mensual.</p>
+              <p class="field-error hidden" data-error-for="desired_salary_min"></p>
+            </div>
+            <div class="field">
+              <label for="desired_modality" class="label">Modalidad preferida</label>
+              <select id="desired_modality" name="desired_modality" class="select">
+                <option value="">Sin preferencia</option>
+                <option value="presencial">Presencial</option>
+                <option value="hibrido">Híbrido</option>
+                <option value="remoto">Remoto</option>
+              </select>
+            </div>
+            <label class="checkbox span-2">
+              <input type="checkbox" id="willing_to_relocate" name="willing_to_relocate" />
+              <span>Acepto trasladarme a otra ciudad por un buen empleo</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- ============ Perfil profesional ============ -->
+        <section class="form-section" id="profile-editor">
+          <h2 class="form-section-title">Perfil profesional</h2>
+          <div class="field">
+            <label for="summary" class="label">Resumen profesional</label>
+            <textarea id="summary" name="summary" class="textarea" maxlength="2000" rows="4"
+              placeholder="Cuéntales a las empresas quién eres y qué sabes hacer."></textarea>
+            <p class="char-count" data-count-for="summary"></p>
+          </div>
+
+          <div class="field">
+            <label for="skill-input" class="label">Habilidades y herramientas</label>
+            <div class="skill-input-row">
+              <input id="skill-input" class="input" maxlength="100" placeholder="Escribe y elige una sugerencia (ej: Excel, Python)" />
+              <button type="button" id="add-skill" class="btn btn-outline btn-sm">Agregar</button>
+            </div>
+            <div id="skill-chips" class="chips mt-1"></div>
+          </div>
+
+          <div class="field">
+            <span class="label">Experiencia laboral</span>
+            <div id="experience-list" class="entry-list"></div>
+            <button type="button" id="add-experience" class="btn btn-outline btn-sm">+ Agregar experiencia</button>
+          </div>
+
+          <div class="field">
+            <span class="label">Educación</span>
+            <div id="education-list" class="entry-list"></div>
+            <button type="button" id="add-education" class="btn btn-outline btn-sm">+ Agregar estudio</button>
+          </div>
+
+          <div class="field">
+            <span class="label">Idiomas</span>
+            <div id="language-list" class="entry-list"></div>
+            <button type="button" id="add-language" class="btn btn-outline btn-sm">+ Agregar idioma</button>
+          </div>
+        </section>
+
+        <div class="form-actions save-bar">
+          <span class="hint" id="dirty-hint" hidden>Tienes cambios sin guardar.</span>
+          <button type="submit" class="btn btn-primary" id="save-btn">Guardar perfil</button>
+        </div>
+      </form>
+
+      <!-- ============ Cuenta ============ -->
+      <section class="card card-flat form-card stack" aria-labelledby="password-title">
+        <h2 class="form-section-title" id="password-title">Cambiar contraseña</h2>
+        <div id="password-box"></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/applicantProfileController.js"></script>
+</body>
+</html>
