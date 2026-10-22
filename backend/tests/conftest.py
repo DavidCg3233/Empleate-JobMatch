@@ -8,7 +8,8 @@ from sqlalchemy.pool import StaticPool
 
 import app.models as m
 from app.config import settings
-from app.controllers import applicant_controller, auth_controller
+from app.controllers import applicant_controller, auth_controller, matching_controller
+from app.services import ai_matching_service
 from app.database import Base, get_db
 from app.services import email_service
 from app.services.skill_service import seed_curated_skills
@@ -62,7 +63,9 @@ def client(db_session, sent_emails):
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
-    for limiter in (auth_controller.cv_limiter, auth_controller.forgot_limiter, applicant_controller.cv_limiter):
+    ai_matching_service.reset_pauses()
+    for limiter in (auth_controller.cv_limiter, auth_controller.forgot_limiter, applicant_controller.cv_limiter,
+                    matching_controller.analysis_limiter):
         limiter._hits.clear()
     with TestClient(app) as c:
         yield c

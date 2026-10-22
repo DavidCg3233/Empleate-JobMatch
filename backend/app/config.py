@@ -48,7 +48,10 @@ class Settings(BaseSettings):
     ANTHROPIC_MODEL: str = "claude-opus-5-5"
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
     AI_TIMEOUT_SECONDS: int = 60
+    # Emparejamiento con IA (si hay proveedor configurado): afinidad semántica + análisis de cada pareja
+    AI_MATCHING_ENABLED: bool = True
 
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 

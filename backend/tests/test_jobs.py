@@ -297,3 +297,26 @@ def test_only_applicants_can_use_job_search(client, world):
 def test_contract_types_catalog(client):
     r = client.get("/api/catalogs/contract-types")
     assert r.status_code == 200 and r.json()[0] == {"id": 1, "name": "Término indefinido"}
+
+
+def test_feed_and_search_filter_by_match_level(client, world):
+    headers, ids = auth(world["token"]), world["ids"]
+    everything = client.get("/api/jobs/feed", headers=headers).json()
+    scores = {j["id"]: j["score"] for j in everything["items"]}
+    assert everything["hidden_count"] == 0
+
+    cut = sorted(scores.values())[1]  # deja por fuera al menos la de menor puntaje
+    recommended = client.get("/api/jobs/feed", params={"min_score": cut}, headers=headers).json()
+    assert all(j["score"] >= cut for j in recommended["items"])
+    assert recommended["hidden_count"] == sum(1 for v in scores.values() if v < cut) >= 1
+
+    found = client.get("/api/jobs/search", params={"min_score": cut}, headers=headers).json()
+    assert found["total"] == len(recommended["items"]) and all(j["score"] >= cut for j in found["items"])
+    assert client.get("/api/jobs/feed", params={"min_score": 101}, headers=headers).status_code == 422
+
+
+def test_low_match_cards_show_gaps(client, world):
+    items = {j["id"]: j for j in client.get("/api/jobs/feed", headers=auth(world["token"])).json()["items"]}
+    frontend = items[world["ids"]["frontend"]]  # pide React y CSS, que el aspirante no tiene
+    assert frontend["score_gaps"][0] == "No registras las habilidades requeridas: CSS, React"
+    assert not any("habilidades requeridas" in reason for reason in frontend["score_reasons"])

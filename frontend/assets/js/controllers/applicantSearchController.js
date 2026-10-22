@@ -13,7 +13,7 @@ const allowed = requireRole("aspirante");
 if (allowed) renderApplicantNav("search");
 
 const PAGE_SIZE = 12;
-const FILTER_NAMES = ["q", "city_id", "modality", "contract_type_id", "salary_min", "sort", "hide_discarded"];
+const FILTER_NAMES = ["q", "city_id", "modality", "contract_type_id", "salary_min", "min_score", "sort", "hide_discarded"];
 
 const form = document.getElementById("search-form");
 const qInput = document.getElementById("q");

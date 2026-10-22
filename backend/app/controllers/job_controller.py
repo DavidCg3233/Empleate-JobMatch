@@ -20,11 +20,13 @@ def feed(
     modality: Modality | None = None,
     contract_type_id: int | None = Query(default=None, gt=0),
     exclude: list[int] = Query(default=[], max_length=100),
+    min_score: int | None = Query(default=None, ge=0, le=100),
     user: User = Depends(applicant_only),
     db: Session = Depends(get_db),
 ):
-    """Tarjetas para deslizar: vacantes que el aspirante aún no ha visto, de la más compatible a la menos."""
-    return job_service.get_feed(db, user, city_id, modality, contract_type_id, exclude)
+    """Tarjetas para deslizar: vacantes que el aspirante aún no ha visto, de la más compatible a la menos.
+    Con min_score solo salen las que tienen al menos esa compatibilidad (las recomendadas)."""
+    return job_service.get_feed(db, user, city_id, modality, contract_type_id, exclude, min_score)
 
 
 @router.get("/search", response_model=JobPageOut)
@@ -38,12 +40,13 @@ def search(
     hide_discarded: bool = False,
     page: int = Query(default=1, ge=1, le=100),
     page_size: int = Query(default=12, ge=1, le=50),
+    min_score: int | None = Query(default=None, ge=0, le=100),
     user: User = Depends(applicant_only),
     db: Session = Depends(get_db),
 ):
     """Buscador con filtros. Incluye las vacantes ya marcadas (con su estado en my_action)."""
     return job_service.search_jobs(
-        db, user, q, city_id, modality, contract_type_id, salary_min, sort, hide_discarded, page, page_size
+        db, user, q, city_id, modality, contract_type_id, salary_min, sort, hide_discarded, page, page_size, min_score
     )
 
 

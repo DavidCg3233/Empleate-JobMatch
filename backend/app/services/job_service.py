@@ -16,6 +16,7 @@ from app.models.job import Job, JobSkill
 from app.models.match import Match
 from app.models.swipe import ApplicantSwipe, CompanySwipe
 from app.models.user import User
+from app.services import ai_matching_service
 from app.services.matching_service import ApplicantContext, compute_score, load_applicant_context
 
 FEED_SIZE = 20
@@ -78,8 +79,10 @@ def _serialize(
     my_action: str | None,
     matched: bool,
     is_open: bool = True,
+    semantic: float | None = None,  # afinidad de la IA (None = solo reglas)
 ) -> dict:
-    score, reasons, matched_skills = compute_score(ctx, job)
+    result = compute_score(ctx, job, semantic=semantic)
+    matched_skills = result.matched_skills
     city, department = catalogs.cities.get(job.city_id, (None, None))
     company = job.company
     skills = sorted(job.skills, key=lambda js: (not js.is_required, js.skill.name.lower()))
@@ -113,8 +116,9 @@ def _serialize(
             {"name": js.skill.name, "is_required": js.is_required, "matched": js.skill.name in matched_skills}
             for js in skills
         ],
-        "score": score,
-        "score_reasons": reasons,
+        "score": result.score,
+        "score_reasons": result.strengths,  # a favor
+        "score_gaps": result.gaps,  # en contra
         "my_action": my_action,
         "matched": matched,
     }
@@ -163,6 +167,7 @@ def get_feed(
     modality: str | None = None,
     contract_type_id: int | None = None,
     exclude_ids: list[int] | None = None,
+    min_score: int | None = None,
 ) -> dict:
     applicant = get_applicant(db, user)
     ctx = load_applicant_context(db, applicant)
@@ -179,10 +184,17 @@ def get_feed(
     ).unique().all()
 
     catalogs = _Catalogs(db)
-    items = [_serialize(job, ctx, catalogs, None, False) for job in jobs]
+    semantic = ai_matching_service.semantic_for_applicant(db, applicant, list(jobs))
+    items = [_serialize(job, ctx, catalogs, None, False, semantic=semantic.get(job.id)) for job in jobs]
     # Primero las más compatibles; a igual puntaje, las más recientes (ya vienen en ese orden)
     items.sort(key=lambda item: -item["score"])
-    return {"items": items[:FEED_SIZE]}
+    # Solo las recomendadas: se ocultan las de baja compatibilidad (y se informa cuántas quedaron fuera)
+    hidden = 0
+    if min_score:
+        visible = [item for item in items if item["score"] >= min_score]
+        hidden = len(items) - len(visible)
+        items = visible
+    return {"items": items[:FEED_SIZE], "hidden_count": hidden}
 
 
 # =====================================================================
@@ -200,6 +212,7 @@ def search_jobs(
     hide_discarded: bool = False,
     page: int = 1,
     page_size: int = 12,
+    min_score: int | None = None,
 ) -> dict:
     applicant = get_applicant(db, user)
     ctx = load_applicant_context(db, applicant)
@@ -246,7 +259,10 @@ def search_jobs(
     swipes = _swipe_map(db, applicant.id, job_ids)
     matched = _matched_ids(db, applicant.id, job_ids)
     catalogs = _Catalogs(db)
-    items = [_serialize(j, ctx, catalogs, swipes.get(j.id), j.id in matched) for j in jobs]
+    semantic = ai_matching_service.semantic_for_applicant(db, applicant, list(jobs))
+    items = [_serialize(j, ctx, catalogs, swipes.get(j.id), j.id in matched, semantic=semantic.get(j.id)) for j in jobs]
+    if min_score:
+        items = [item for item in items if item["score"] >= min_score]
 
     if sort == "relevancia":
         items.sort(key=lambda item: -item["score"])
@@ -279,21 +295,27 @@ def _active_company_ids(db: Session, company_ids: set[int]) -> set[int]:
     )
 
 
-def get_job_detail(db: Session, user: User, job_id: int) -> dict:
-    applicant = get_applicant(db, user)
+def get_viewable_job(db: Session, applicant: Applicant, job_id: int) -> tuple[Job, str | None, bool]:
+    """La vacante si el aspirante la puede ver: abierta, o cerrada pero ya marcada por él (ej: sus matches).
+    Devuelve (vacante, su decisión, si está abierta)."""
     job = db.get(Job, job_id)
     if job is None:
         raise api_error(404, "La vacante no existe.")
-
     my_action = _swipe_map(db, applicant.id, [job.id]).get(job.id)
-    is_matched = job.id in _matched_ids(db, applicant.id, [job.id])
     is_open = _is_open(job, _active_company_ids(db, {job.company_id}))
-    # Una vacante cerrada solo la puede ver quien ya la había marcado (ej: sus matches)
     if not is_open and my_action is None:
         raise api_error(404, "Esta vacante ya no está disponible.")
+    return job, my_action, is_open
+
+
+def get_job_detail(db: Session, user: User, job_id: int) -> dict:
+    applicant = get_applicant(db, user)
+    job, my_action, is_open = get_viewable_job(db, applicant, job_id)
+    is_matched = job.id in _matched_ids(db, applicant.id, [job.id])
 
     ctx = load_applicant_context(db, applicant)
-    return _serialize(job, ctx, _Catalogs(db), my_action, is_matched, is_open)
+    semantic = ai_matching_service.semantic_for_applicant(db, applicant, [job]).get(job.id)
+    return _serialize(job, ctx, _Catalogs(db), my_action, is_matched, is_open, semantic=semantic)
 
 
 # =====================================================================
@@ -392,12 +414,13 @@ def get_my_matches(db: Session, user: User) -> dict:
     ).unique().all()
 
     active_companies = _active_company_ids(db, {job.company_id for _, job in matches})
+    semantic = ai_matching_service.semantic_for_applicant(db, applicant, [job for _, job in matches] + list(liked_jobs))
     return {
         "matches": [
             {
                 "match_id": match.id,
                 "matched_at": match.matched_at,
-                "job": _serialize(job, ctx, catalogs, "like", True, _is_open(job, active_companies)),
+                "job": _serialize(job, ctx, catalogs, "like", True, _is_open(job, active_companies), semantic=semantic.get(job.id)),
                 "contact": {
                     "name": job.company.contact_name,
                     "email": job.company.contact_email,
@@ -407,6 +430,7 @@ def get_my_matches(db: Session, user: User) -> dict:
             for match, job in matches
         ],
         "liked": [
-            _serialize(job, ctx, catalogs, "like", False) for job in liked_jobs if job.id not in matched_job_ids
+            _serialize(job, ctx, catalogs, "like", False, semantic=semantic.get(job.id))
+            for job in liked_jobs if job.id not in matched_job_ids
         ],
     }

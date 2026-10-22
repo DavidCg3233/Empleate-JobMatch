@@ -53,7 +53,7 @@ function matchCard(match) {
     el("div", { class: "match-actions" },
       el("button", {
         type: "button", class: "btn btn-secondary btn-sm", textContent: "Ver perfil completo",
-        onclick: () => openCandidateDetail(candidate, { contact, onDownloadCv: () => downloadCv(match) }),
+        onclick: () => openCandidateDetail(candidate, { contact, jobId: job.id, onDownloadCv: () => downloadCv(match) }),
       }),
       cvBtn,
     ),

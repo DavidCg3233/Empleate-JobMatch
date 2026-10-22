@@ -3,6 +3,7 @@ import { getFeed } from "../api/jobApi.js";
 import { swipeJob, undoSwipe } from "../api/swipeApi.js";
 import { createChipFilter } from "../components/filters.js";
 import { openJobDetail } from "../components/jobDetail.js";
+import { RECOMMENDED_MIN } from "../components/matchReasons.js";
 import { showMatch } from "../components/matchOverlay.js";
 import { renderApplicantNav } from "../components/navbar.js";
 import { createSwipeCard } from "../components/swipecard.js";
@@ -14,7 +15,8 @@ import { initials } from "../utils/format.js";
 const allowed = requireRole("aspirante");
 if (allowed) renderApplicantNav("swipe");
 
-const filters = {};
+const filters = { min_score: RECOMMENDED_MIN }; // por defecto solo las recomendadas
+let hiddenCount = 0;  // vacantes de baja compatibilidad que no se están mostrando
 
 function emptyContent({ fetching, loadError, retry }) {
   if (fetching) {
@@ -27,18 +29,27 @@ function emptyContent({ fetching, loadError, retry }) {
       el("button", { type: "button", class: "btn btn-primary btn-sm", textContent: "Reintentar", onclick: () => retry() }),
     ];
   }
-  const hasFilters = Object.values(filters).some(Boolean);
+  const onlyRecommended = Boolean(filters.min_score);
+  const hasModality = Boolean(filters.modality);
+  let message = "Vuelve más tarde: las empresas publican vacantes nuevas todos los días.";
+  if (onlyRecommended && hiddenCount) {
+    message = `Hay ${hiddenCount} ${hiddenCount === 1 ? "vacante" : "vacantes"} más con baja compatibilidad con tu perfil. Puedes verlas o completar tu perfil para mejorar tus recomendaciones.`;
+  } else if (hasModality) {
+    message = "No hay más vacantes con esta modalidad. Prueba con otra.";
+  }
   return [
     el("span", { class: "swipe-empty-icon", "aria-hidden": "true", textContent: "🎉" }),
-    el("h3", { textContent: "¡Viste todas las vacantes!" }),
-    el("p", {
-      textContent: hasFilters
-        ? "No hay más vacantes con este filtro. Prueba con otra modalidad."
-        : "Vuelve más tarde: las empresas publican vacantes nuevas todos los días.",
-    }),
+    el("h3", { textContent: onlyRecommended ? "¡Viste todas tus vacantes recomendadas!" : "¡Viste todas las vacantes!" }),
+    el("p", { textContent: message }),
     el("div", { class: "row" },
-      hasFilters
-        ? el("button", { type: "button", class: "btn btn-secondary btn-sm", textContent: "Ver todas", onclick: () => { modalityFilter.set(""); applyFilter(""); } })
+      onlyRecommended && hiddenCount
+        ? el("button", { type: "button", class: "btn btn-secondary btn-sm", textContent: "Ver también las de baja compatibilidad", onclick: () => { matchFilter.set("todas"); applyMatch("todas"); } })
+        : null,
+      hasModality
+        ? el("button", { type: "button", class: "btn btn-secondary btn-sm", textContent: "Todas las modalidades", onclick: () => { modalityFilter.set(""); applyFilter(""); } })
+        : null,
+      onlyRecommended && hiddenCount
+        ? el("a", { href: "profile.html", class: "btn btn-outline btn-sm", textContent: "Completar mi perfil" })
         : null,
       el("a", { href: "search.html", class: "btn btn-outline btn-sm", textContent: "Ir al buscador" }),
       el("a", { href: "matches.html", class: "btn btn-outline btn-sm", textContent: "Mis matches" }),
@@ -57,7 +68,11 @@ const deck = createSwipeDeck({
   },
   getId: (job) => job.id,
   buildCard: createSwipeCard,
-  fetchPage: async (exclude) => (await getFeed(filters, exclude)).items,
+  fetchPage: async (exclude) => {
+    const page = await getFeed(filters, exclude);
+    hiddenCount = page.hidden_count || 0;
+    return page.items;
+  },
   sendDecision: (job, action) => swipeJob(job.id, action),
   sendUndo: (job) => undoSwipe(job.id),
   renderEmpty: emptyContent,
@@ -89,10 +104,25 @@ function applyFilter(modality) {
   deck.reset({ keepHistory: true });
 }
 
+function applyMatch(value) {
+  if (value === "recomendadas") filters.min_score = RECOMMENDED_MIN;
+  else delete filters.min_score;
+  deck.reset({ keepHistory: true });
+}
+
+const matchFilter = createChipFilter(
+  document.getElementById("match-filters"),
+  [
+    { value: "recomendadas", label: `✨ Recomendadas (${RECOMMENDED_MIN}% o más)` },
+    { value: "todas", label: "Todas las vacantes" },
+  ],
+  { value: "recomendadas", onChange: applyMatch },
+);
+
 const modalityFilter = createChipFilter(
   document.getElementById("modality-filters"),
   [
-    { value: "", label: "Todas" },
+    { value: "", label: "Cualquier modalidad" },
     { value: "remoto", label: "🏠 Remoto" },
     { value: "hibrido", label: "🔀 Híbrido" },
     { value: "presencial", label: "🏢 Presencial" },

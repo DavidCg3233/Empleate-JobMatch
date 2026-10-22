@@ -226,7 +226,8 @@ class CandidateOut(BaseModel):
     willing_to_relocate: bool
     desired_modality: Modality | None
     score: int
-    score_reasons: list[str]
+    score_reasons: list[str]  # a favor: por qué encaja
+    score_gaps: list[str]  # en contra: qué no encaja o falta
     interested: bool  # el aspirante ya dijo "me interesa" a esta vacante
     company_action: Literal["like", "dislike"] | None
     matched: bool

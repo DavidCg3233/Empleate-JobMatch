@@ -20,7 +20,7 @@ from app.models.job import Job
 from app.models.match import Match
 from app.models.swipe import ApplicantSwipe, CompanySwipe
 from app.models.user import User
-from app.services import storage_service
+from app.services import ai_matching_service, storage_service
 from app.services.company_service import get_company, get_owned_job
 from app.services.matching_service import compute_score, load_applicant_contexts
 from app.utils.helpers import normalize_text
@@ -64,6 +64,7 @@ def _serialize_candidates(
         return []
 
     contexts = load_applicant_contexts(db, applicants)
+    semantic = ai_matching_service.semantic_for_job(db, job, applicants)  # {} si no hay IA
     city_names = dict(db.execute(select(City.id, City.name)).all())
     job_skill_names = {normalize_text(js.skill.name) for js in job.skills}
 
@@ -114,7 +115,7 @@ def _serialize_candidates(
     result = []
     for a in applicants:
         ctx = contexts[a.id]
-        score, reasons, _ = compute_score(ctx, job, audience="empresa")
+        fit = compute_score(ctx, job, audience="empresa", semantic=semantic.get(a.id))
         matched = a.id in matched_ids
         result.append({
             "applicant_id": a.id,
@@ -131,8 +132,9 @@ def _serialize_candidates(
             "languages": languages[a.id],
             "willing_to_relocate": bool(a.willing_to_relocate),
             "desired_modality": a.desired_modality,
-            "score": score,
-            "score_reasons": reasons,
+            "score": fit.score,
+            "score_reasons": fit.strengths,  # a favor
+            "score_gaps": fit.gaps,  # en contra
             "interested": a.id in interested_ids,
             "company_action": company_actions.get(a.id),
             "matched": matched,

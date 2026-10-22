@@ -102,6 +102,7 @@ const deck = createSwipeDeck({
   renderEmpty: emptyContent,
   openDetail: (c, decide) => {
     const close = openCandidateDetail(c, {
+      jobId,
       onAction: async (action) => {
         close();
         await decide(action);

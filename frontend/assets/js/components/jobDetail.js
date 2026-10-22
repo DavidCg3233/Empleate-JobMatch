@@ -1,7 +1,10 @@
 // Ventana con el detalle completo de una vacante.
 // openJobDetail(job, { onAction: async (action) => {...} })  -> devuelve la función para cerrarla.
 // Si se pasa onAction, se muestran los botones "No me interesa" / "Me interesa".
+import { aiAnalysisSection } from "./aiAnalysis.js";
+import { reasonLists } from "./matchReasons.js";
 import { openModal } from "./modal.js";
+import { getJobAnalysis } from "../api/matchingApi.js";
 import { skillChips } from "./swipecard.js";
 import { el } from "../utils/dom.js";
 import {
@@ -43,11 +46,11 @@ export function openJobDetail(job, { onAction } = {}) {
       el("span", { class: `score-badge score-inline ${scoreClass(job.score)}`, textContent: `${job.score}%` }),
       el("div", {},
         el("strong", { textContent: "Compatibilidad con tu perfil" }),
-        job.score_reasons.length
-          ? el("ul", { class: "detail-reasons" }, job.score_reasons.map((r) => el("li", { textContent: r })))
-          : null,
+        reasonLists(job, "aspirante"),
       ),
     ),
+
+    aiAnalysisSection(() => getJobAnalysis(job.id), "aspirante"),
 
     el("dl", { class: "detail-info" },
       infoRow("Ubicación", formatLocation(job)),

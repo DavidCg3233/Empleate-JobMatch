@@ -1,5 +1,8 @@
 // Aspirantes vistos por la empresa: tarjeta para deslizar y ventana con el perfil completo.
+import { aiAnalysisSection } from "./aiAnalysis.js";
+import { cardReason, reasonLists } from "./matchReasons.js";
 import { openModal } from "./modal.js";
+import { getCandidateAnalysis } from "../api/matchingApi.js";
 import { el } from "../utils/dom.js";
 import { MODALITY_LABEL, formatPeriod, formatYears, initials, scoreClass } from "../utils/format.js";
 
@@ -33,7 +36,6 @@ function metaList(c) {
 /** Tarjeta para deslizar. El botón "Ver perfil" lleva data-action="detail". */
 export function createCandidateCard(c) {
   const latest = c.experiences[0];
-  const reasons = c.score_reasons.slice(0, 2);
   return el("article", { class: "swipe-card candidate-card", dataset: { applicantId: c.applicant_id }, "aria-label": `Perfil de ${c.display_name}` },
     el("span", { class: "swipe-stamp like", "aria-hidden": "true", textContent: "ME INTERESA" }),
     el("span", { class: "swipe-stamp nope", "aria-hidden": "true", textContent: "NO" }),
@@ -52,7 +54,7 @@ export function createCandidateCard(c) {
         el("p", { class: "card-section-title", textContent: "Habilidades" }),
         candidateSkillChips(c.skills),
       ) : null,
-      reasons.length ? el("p", { class: "ai-reason" }, el("strong", { textContent: "Por qué encaja: " }), reasons.join(" · ")) : null,
+      cardReason(c, "empresa"),
       latest ? el("div", {},
         el("p", { class: "card-section-title", textContent: "Experiencia reciente" }),
         el("p", { class: "card-summary", textContent: `${latest.position} · ${latest.company_name} (${formatPeriod(latest.start_date, latest.end_date, latest.is_current)})` }),
@@ -89,9 +91,10 @@ function timeline(items, render) {
  *   contact,                 // datos de contacto (solo con match)
  *   onDownloadCv,            // async () => {} para descargar la hoja de vida
  *   onAction,                // async (action) => {}  muestra los botones Me interesa / No me interesa
+ *   jobId,                   // vacante para la que se revisa (activa el "Análisis con IA")
  * })
  */
-export function openCandidateDetail(c, { contact = null, onDownloadCv = null, onAction = null } = {}) {
+export function openCandidateDetail(c, { contact = null, onDownloadCv = null, onAction = null, jobId = null } = {}) {
   const titleId = `candidate-title-${c.applicant_id}`;
 
   let contactSection = null;
@@ -128,9 +131,11 @@ export function openCandidateDetail(c, { contact = null, onDownloadCv = null, on
       el("span", { class: `score-badge score-inline ${scoreClass(c.score)}`, textContent: `${c.score}%` }),
       el("div", {},
         el("strong", { textContent: "Compatibilidad con la vacante" }),
-        c.score_reasons.length ? el("ul", { class: "detail-reasons" }, c.score_reasons.map((r) => el("li", { textContent: r }))) : null,
+        reasonLists(c, "empresa"),
       ),
     ),
+
+    jobId ? aiAnalysisSection(() => getCandidateAnalysis(jobId, c.applicant_id), "empresa") : null,
 
     el("dl", { class: "detail-info" },
       infoRow("Ciudad", c.city || "No indicada"),

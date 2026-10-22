@@ -370,6 +370,7 @@ CREATE TABLE match_scores (
   score                TINYINT UNSIGNED NULL,       -- 0-100 calculado por la IA
   explanation          TEXT NULL,                   -- "por que hace match"
   model_used           VARCHAR(80) NULL,
+  content_hash         CHAR(64) NULL,               -- huella del perfil + vacante analizados
   calculated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_match_scores (applicant_id, job_id),
@@ -385,6 +386,7 @@ CREATE TABLE applicant_embeddings (
   applicant_id  INT UNSIGNED NOT NULL,
   model         VARCHAR(80) NOT NULL,
   vector        JSON NOT NULL,                      -- arreglo de floats
+  content_hash  CHAR(64) NULL,                      -- huella del texto con que se calculó
   updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (applicant_id),
   CONSTRAINT fk_applicant_embeddings FOREIGN KEY (applicant_id)
@@ -395,6 +397,7 @@ CREATE TABLE job_embeddings (
   job_id      INT UNSIGNED NOT NULL,
   model       VARCHAR(80) NOT NULL,
   vector      JSON NOT NULL,
+  content_hash CHAR(64) NULL,
   updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (job_id),
   CONSTRAINT fk_job_embeddings FOREIGN KEY (job_id)

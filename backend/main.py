@@ -14,11 +14,12 @@ from app.controllers import (
     company_controller,
     job_controller,
     match_controller,
+    matching_controller,
     swipe_controller,
 )
 from app.database import get_db
 
-app = FastAPI(title="Empléate Jobmatch API", version="0.6.0")
+app = FastAPI(title="Empléate Jobmatch API", version="0.7.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,6 +38,7 @@ app.include_router(company_controller.router)
 app.include_router(job_controller.company_router)
 app.include_router(swipe_controller.router)
 app.include_router(match_controller.router)
+app.include_router(matching_controller.router)
 
 
 @app.get("/api/health", tags=["Sistema"])

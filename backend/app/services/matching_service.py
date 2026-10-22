@@ -1,14 +1,18 @@
 """Compatibilidad aspirante <-> vacante (0 a 100) con sus razones.
 
-Es un cálculo por reglas, rápido y sin costo (no usa IA):
+Base: cálculo por reglas, rápido y sin costo:
   - Habilidades requeridas y deseables ........ 50 puntos
   - Años de experiencia ....................... 15 puntos
   - Nivel educativo ........................... 10 puntos
   - Ubicación (ciudad / remoto / traslado) .... 15 puntos
   - Modalidad preferida ........................ 5 puntos
   - Salario esperado ........................... 5 puntos
+
+Si la IA está activa (ai_matching_service), se suma la afinidad semántica entre el perfil y la vacante:
+  puntaje final = 70 % reglas + 30 % afinidad semántica.
 """
 from dataclasses import dataclass, field
+from typing import NamedTuple
 from datetime import date
 
 from sqlalchemy import select
@@ -113,7 +117,7 @@ def _plural_years(n: float) -> str:
 PHRASES = {
     "aspirante": {
         "req_hit": "Tienes {hit} de {total} habilidades requeridas: {names}",
-        "req_none": "Aún no registras las habilidades requeridas para esta vacante",
+        "req_none": "No registras las habilidades requeridas: {names}",
         "desired": "Sumas puntos con: {names}",
         "no_exp": "No exige experiencia previa",
         "exp_ok": "Cumples la experiencia mínima ({need})",
@@ -125,10 +129,17 @@ PHRASES = {
         "relocate": "Es en otra ciudad, pero aceptas trasladarte",
         "modality": "Modalidad {modality}, como prefieres",
         "salary": "El salario cumple tu aspiración",
+        "semantic_high": "Tu perfil es muy afín a lo que describe la vacante",
+        "semantic_low": "La vacante tiene poca relación con tu perfil",
+        # En contra
+        "req_missing": "Te faltan habilidades requeridas: {names}",
+        "other_city": "La vacante es en otra ciudad",
+        "modality_diff": "Es {modality} y prefieres {preferred}",
+        "salary_low": "El salario está por debajo de tu aspiración",
     },
     "empresa": {
         "req_hit": "Tiene {hit} de {total} habilidades requeridas: {names}",
-        "req_none": "No registra las habilidades requeridas",
+        "req_none": "No registra las habilidades requeridas: {names}",
         "desired": "Suma puntos con: {names}",
         "no_exp": "La vacante no exige experiencia",
         "exp_ok": "Cumple la experiencia mínima ({need}); registra {has}",
@@ -140,14 +151,46 @@ PHRASES = {
         "relocate": "Vive en otra ciudad, pero acepta trasladarse",
         "modality": "Prefiere la modalidad {modality}",
         "salary": "Su aspiración salarial está dentro del rango",
+        "semantic_high": "Su perfil es muy afín a lo que describe la vacante",
+        "semantic_low": "Su perfil tiene poca relación con la vacante",
+        # En contra
+        "req_missing": "Le faltan habilidades requeridas: {names}",
+        "other_city": "Vive en otra ciudad y no indicó que acepte trasladarse",
+        "modality_diff": "Prefiere la modalidad {preferred}",
+        "salary_low": "Su aspiración salarial supera el salario ofrecido",
     },
 }
 
 
-def compute_score(ctx: ApplicantContext, job: Job, audience: str = "aspirante") -> tuple[int, list[str], set[str]]:
-    """Devuelve (puntaje 0-100, razones para mostrar, habilidades de la vacante que el aspirante tiene)."""
+SEMANTIC_WEIGHT = 0.30   # peso de la afinidad semántica (IA) en el puntaje final
+# Rango típico de similitud coseno entre perfiles y vacantes: se lleva a 0-100
+SEMANTIC_LOW, SEMANTIC_HIGH = 0.20, 0.70
+
+
+def semantic_points(similarity: float) -> float:
+    """Similitud coseno (embeddings) -> 0 a 100."""
+    return max(0.0, min(1.0, (similarity - SEMANTIC_LOW) / (SEMANTIC_HIGH - SEMANTIC_LOW))) * 100
+
+
+class MatchResult(NamedTuple):
+    score: int  # 0-100
+    strengths: list[str]  # a favor: por qué encaja
+    gaps: list[str]  # en contra: qué no encaja o falta
+    matched_skills: set[str]  # habilidades de la vacante que el aspirante tiene
+
+
+def _names(items: list[str], limit: int = 4) -> str:
+    return ", ".join(items[:limit]) + ("…" if len(items) > limit else "")
+
+
+def compute_score(
+    ctx: ApplicantContext, job: Job, audience: str = "aspirante", semantic: float | None = None
+) -> MatchResult:
+    """Puntaje 0-100 con las razones a favor y en contra.
+    `semantic` es la similitud de la IA (coseno); si no hay IA llega None y el puntaje es solo por reglas."""
     t = PHRASES[audience]
-    reasons: list[str] = []
+    strengths: list[str] = []
+    gaps: list[str] = []
     score = 0.0
 
     # ---- Habilidades (50) ----
@@ -156,6 +199,7 @@ def compute_score(ctx: ApplicantContext, job: Job, audience: str = "aspirante") 
     matched = {name for name in required + desired if normalize_text(name) in ctx.skills}
     if required or desired:
         req_hit = [s for s in required if s in matched]
+        req_miss = [s for s in required if s not in matched]
         des_hit = [s for s in desired if s in matched]
         if required:
             score += 40 * len(req_hit) / len(required)
@@ -164,12 +208,13 @@ def compute_score(ctx: ApplicantContext, job: Job, audience: str = "aspirante") 
             score += 50 * len(des_hit) / len(desired)
         if required:
             if req_hit:
-                names = ", ".join(req_hit[:4]) + ("…" if len(req_hit) > 4 else "")
-                reasons.append(t["req_hit"].format(hit=len(req_hit), total=len(required), names=names))
+                strengths.append(t["req_hit"].format(hit=len(req_hit), total=len(required), names=_names(req_hit)))
+                if req_miss:
+                    gaps.append(t["req_missing"].format(names=_names(req_miss)))
             else:
-                reasons.append(t["req_none"])
+                gaps.append(t["req_none"].format(names=_names(req_miss)))
         if des_hit:
-            reasons.append(t["desired"].format(names=", ".join(des_hit[:3])))
+            strengths.append(t["desired"].format(names=_names(des_hit, 3)))
     else:
         # La vacante no lista habilidades: se buscan las del aspirante en el texto
         text = normalize_text(f"{job.title} {job.description} {job.requirements or ''}")
@@ -180,42 +225,47 @@ def compute_score(ctx: ApplicantContext, job: Job, audience: str = "aspirante") 
     need = job.min_experience_years or 0
     if need == 0:
         score += 15
-        reasons.append(t["no_exp"])
+        strengths.append(t["no_exp"])
     elif ctx.experience_years >= need:
         score += 15
-        reasons.append(t["exp_ok"].format(need=_plural_years(need), has=_plural_years(ctx.experience_years)))
+        strengths.append(t["exp_ok"].format(need=_plural_years(need), has=_plural_years(ctx.experience_years)))
     else:
         score += 15 * ctx.experience_years / need
-        reasons.append(t["exp_low"].format(need=_plural_years(need), has=_plural_years(ctx.experience_years)))
+        gaps.append(t["exp_low"].format(need=_plural_years(need), has=_plural_years(ctx.experience_years)))
 
     # ---- Educación (10) ----
     if job.min_education is None:
         score += 10
     elif ctx.education_rank >= job.min_education.rank_order:
         score += 10
-        reasons.append(t["edu_ok"].format(level=job.min_education.name))
+        strengths.append(t["edu_ok"].format(level=job.min_education.name))
     else:
         score += 3 if ctx.education_rank else 0
-        reasons.append(t["edu_low"].format(level=job.min_education.name))
+        gaps.append(t["edu_low"].format(level=job.min_education.name))
 
     # ---- Ubicación (15) ----
     if job.modality == "remoto":
         score += 15
-        reasons.append(t["remote"])
+        strengths.append(t["remote"])
     elif job.city_id and job.city_id == ctx.city_id:
         score += 15
-        reasons.append(t["same_city"])
+        strengths.append(t["same_city"])
     elif ctx.willing_to_relocate:
         score += 8
-        reasons.append(t["relocate"])
-    elif job.modality == "hibrido":
-        score += 4
+        strengths.append(t["relocate"])
+    else:
+        score += 4 if job.modality == "hibrido" else 0
+        gaps.append(t["other_city"])
 
     # ---- Modalidad (5) ----
     if ctx.desired_modality is None or ctx.desired_modality == job.modality:
         score += 5
         if ctx.desired_modality:
-            reasons.append(t["modality"].format(modality=MODALITY_LABELS[job.modality]))
+            strengths.append(t["modality"].format(modality=MODALITY_LABELS[job.modality]))
+    else:
+        gaps.append(t["modality_diff"].format(
+            modality=MODALITY_LABELS[job.modality], preferred=MODALITY_LABELS[ctx.desired_modality]
+        ))
 
     # ---- Salario (5) ----
     top = job.salary_max or job.salary_min
@@ -223,6 +273,17 @@ def compute_score(ctx: ApplicantContext, job: Job, audience: str = "aspirante") 
         score += 3
     elif float(top) >= ctx.desired_salary_min:
         score += 5
-        reasons.append(t["salary"])
+        strengths.append(t["salary"])
+    else:
+        gaps.append(t["salary_low"])
 
-    return max(0, min(100, round(score))), reasons, matched
+    # ---- Afinidad semántica (IA) ----
+    if semantic is not None:
+        points = semantic_points(semantic)
+        score = score * (1 - SEMANTIC_WEIGHT) + points * SEMANTIC_WEIGHT
+        if points >= 70:
+            strengths.insert(0, t["semantic_high"])
+        elif points <= 15:
+            gaps.insert(0, t["semantic_low"])
+
+    return MatchResult(max(0, min(100, round(score))), strengths, gaps, matched)

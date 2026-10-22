@@ -43,13 +43,15 @@ class JobOut(BaseModel):
     is_open: bool  # False si la vacante se cerró o pausó (puede pasar en un match antiguo)
     skills: list[JobSkillOut]
     score: int  # compatibilidad 0-100
-    score_reasons: list[str]
+    score_reasons: list[str]  # a favor: por qué encaja
+    score_gaps: list[str]  # en contra: qué no encaja o falta
     my_action: Literal["like", "dislike"] | None
     matched: bool
 
 
 class JobFeedOut(BaseModel):
     items: list[JobOut]
+    hidden_count: int = 0  # vacantes que no salen por tener baja compatibilidad (con min_score)
 
 
 class JobPageOut(BaseModel):

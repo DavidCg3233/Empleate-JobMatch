@@ -143,6 +143,7 @@ Desde `backend/`, con el entorno virtual activo:
 ```powershell
 pip install -r requirements.txt
 python -m scripts.migrate_skills_catalog   # columnas del catálogo de habilidades + 255 habilidades y herramientas
+python -m scripts.migrate_ai_matching      # columnas de caché para el emparejamiento con IA
 python -m scripts.seed_demo                # opcional: 3 empresas y 12 vacantes de ejemplo (clave Demo1234)
 uvicorn main:app --reload
 ```
@@ -156,3 +157,23 @@ Las pruebas se ejecutan con `python -m pytest`.
 
 `migrate_skills_catalog` se puede ejecutar varias veces sin duplicar nada; quien ya tenga la base creada
 debe ejecutarlo una vez para tener las sugerencias de habilidades.
+
+## Emparejamiento con IA (opcional)
+
+El porcentaje de compatibilidad siempre se calcula con reglas (habilidades, experiencia, educación, ubicación,
+modalidad y salario). Con una clave de OpenAI se suman dos capas:
+
+1. **Afinidad semántica** (embeddings): compara el significado del perfil y de la vacante, aunque usen palabras
+   distintas. Pesa el 30 % del porcentaje. Los vectores se guardan y solo se recalculan si el perfil o la vacante cambian.
+2. **Análisis con IA** (botón en el detalle): por qué encajan, qué falta, un consejo para el aspirante y preguntas
+   de entrevista para la empresa. Se guarda en `match_scores` para no pagar dos veces.
+
+Para activarlo, en `backend/.env` (nunca en `.env.example` ni en el código) y reinicia `uvicorn`:
+
+```
+AI_PROVIDER=openai
+OPENAI_API_KEY=tu_clave
+```
+
+A la IA solo se envía el perfil profesional: nunca el nombre, el correo, el teléfono ni el archivo de la hoja de vida.
+Si la IA falla o se queda sin saldo, la app sigue funcionando con las reglas.

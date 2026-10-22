@@ -4,6 +4,7 @@ El resto del proyecto solo usa get_ai_provider() y .complete_json(...): así se 
 cambiar de Claude a OpenAI (o a otro) tocando únicamente el archivo .env.
 """
 import json
+import logging
 import re
 from abc import ABC, abstractmethod
 
@@ -27,6 +28,14 @@ class AIProvider(ABC):
         text = self._complete(system, user, max_tokens)
         return parse_json(text)
 
+    # ---- Embeddings (vectores de significado). No todos los proveedores los ofrecen. ----
+    supports_embeddings: bool = False
+    embedding_model: str = ""
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        """Devuelve un vector por cada texto, en el mismo orden."""
+        raise AIError(f"El proveedor {self.name} no ofrece embeddings.")
+
 
 def parse_json(text: str) -> dict:
     """Extrae el objeto JSON aunque venga dentro de ```json ... ``` o con texto alrededor."""
@@ -47,18 +56,31 @@ def parse_json(text: str) -> dict:
     return data
 
 
+logger = logging.getLogger("empleate.ai")
+_warned: set[str] = set()
+
+
 def get_ai_provider() -> AIProvider | None:
-    """Devuelve el proveedor configurado en .env, o None si no hay IA disponible."""
+    """Devuelve el proveedor configurado en .env, o None si no hay IA disponible.
+    Si falta una librería (ej: se arrancó el servidor sin el entorno virtual), la IA se desactiva
+    en vez de romper la aplicación, y se avisa en la consola."""
     provider = settings.AI_PROVIDER.strip().lower()
+    try:
+        if provider == "claude" and settings.ANTHROPIC_API_KEY:
+            from app.services.ai.claude_provider import ClaudeProvider
 
-    if provider == "claude" and settings.ANTHROPIC_API_KEY:
-        from app.services.ai.claude_provider import ClaudeProvider
+            return ClaudeProvider()
 
-        return ClaudeProvider()
+        if provider == "openai" and settings.OPENAI_API_KEY:
+            from app.services.ai.openai_provider import OpenAIProvider
 
-    if provider == "openai" and settings.OPENAI_API_KEY:
-        from app.services.ai.openai_provider import OpenAIProvider
-
-        return OpenAIProvider()
-
+            return OpenAIProvider()
+    except ImportError as exc:
+        if provider not in _warned:
+            _warned.add(provider)
+            logger.error(
+                "IA desactivada: falta la librería '%s'. Arranca el servidor con el entorno virtual "
+                "(backend/venv) o ejecuta: pip install -r requirements.txt", exc.name,
+            )
+        return None
     return None

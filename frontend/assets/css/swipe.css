@@ -190,6 +190,15 @@
     height: calc(100dvh - 340px);
     min-height: 340px;
   }
+  /* Dos filas de filtros (compatibilidad + modalidad) o selector de vacante + filtros: tarjeta más baja */
+  .swipe-main:has(.filters-bar + .filters-bar) .swipe-stage,
+  .swipe-main:has(.job-picker) .swipe-stage {
+    height: calc(100vh - 390px);
+    height: calc(100dvh - 390px);
+    min-height: 300px;
+  }
+  .swipe-main .filters-bar { padding-block: 0.15rem; }
+  .swipe-main .filter-chip { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
   .swipe-card { padding: 1.15rem; gap: 0.7rem; }
   .swipe-actions { margin: 1rem 0 0.5rem; gap: 1.1rem; }
   .swipe-btn { width: 58px; height: 58px; }
@@ -337,3 +346,28 @@ body.modal-open { overflow: hidden; }
 .match-contact { background: var(--surface-2); border-radius: var(--radius); padding: 0.75rem 1rem; }
 .match-contact p { margin: 0 0 0.2rem; }
 .match-contact p:last-child { margin-bottom: 0; }
+/* ---------- Análisis con IA (detalle de vacante y de candidato) ---------- */
+.ai-analysis {
+  padding: 1rem 1.1rem; border-radius: var(--radius);
+  border: 1px dashed var(--primary); background: var(--surface-2);
+}
+.ai-body { display: flex; flex-direction: column; gap: 0.7rem; }
+.ai-body p { margin: 0; }
+.ai-head { display: flex; align-items: flex-start; gap: 0.8rem; }
+.ai-summary { font-weight: 600; }
+.ai-list { list-style: none; margin: 0.2rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.92rem; }
+.ai-advice { background: var(--primary-soft); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; }
+.ai-loading { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); }
+.ai-loading .spinner { width: 18px; height: 18px; border-width: 2px; }
+.ai-note { font-size: 0.75rem; }
+.ai-analysis .btn { align-self: flex-start; }
+
+/* ---------- Razones a favor y en contra ---------- */
+.ai-reason.is-warning { background: var(--warning-soft); }
+.ai-reason.is-warning strong { color: var(--warning); }
+.reason-lists { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.4rem; }
+.reason-title { margin: 0; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.reason-group .detail-reasons { list-style: none; padding-left: 0; margin-top: 0.2rem; }
+.reason-group .detail-reasons li { margin-bottom: 0.15rem; }
+.reason-group.is-pro .reason-title, .reason-group.is-pro .detail-reasons span, .reason-group.is-pro .ai-list span { color: var(--success); }
+.reason-group.is-con .reason-title, .reason-group.is-con .detail-reasons span, .reason-group.is-con .ai-list span { color: var(--danger); }

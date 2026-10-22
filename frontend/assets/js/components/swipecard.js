@@ -1,4 +1,5 @@
 // Tarjetas de vacante: la de deslizar (pantalla tipo Tinder) y la de la lista del buscador.
+import { cardReason } from "./matchReasons.js";
 import { el } from "../utils/dom.js";
 import {
   MODALITY_LABEL, formatExperience, formatLocation, formatSalary, initials, scoreClass, timeAgo,
@@ -40,7 +41,6 @@ export function skillChips(skills, max = MAX_CARD_SKILLS) {
 
 /** Tarjeta para deslizar. El botón "Ver detalle" lleva data-action="detail". */
 export function createSwipeCard(job) {
-  const reasons = job.score_reasons.slice(0, 2);
   return el("article", { class: "swipe-card", dataset: { jobId: job.id }, "aria-label": `${job.title} en ${job.company.name}` },
     el("span", { class: "swipe-stamp like", "aria-hidden": "true", textContent: "ME INTERESA" }),
     el("span", { class: "swipe-stamp nope", "aria-hidden": "true", textContent: "NO" }),
@@ -58,9 +58,7 @@ export function createSwipeCard(job) {
         el("p", { class: "card-section-title", textContent: "Habilidades" }),
         skillChips(job.skills),
       ) : null,
-      reasons.length ? el("p", { class: "ai-reason" },
-        el("strong", { textContent: "Por qué encaja: " }), reasons.join(" · "),
-      ) : null,
+      cardReason(job, "aspirante"),
       el("div", {},
         el("p", { class: "card-section-title", textContent: "La vacante" }),
         el("p", { class: "card-summary", textContent: job.description }),

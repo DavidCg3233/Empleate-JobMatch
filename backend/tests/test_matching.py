@@ -30,7 +30,7 @@ def test_overlapping_experience_is_not_counted_twice():
 
 
 def test_perfect_match_scores_100():
-    score, reasons, matched = compute_score(
+    score, reasons, gaps, matched = compute_score(
         ctx(skills={"python", "sql"}, experience_years=5, education_rank=4, desired_salary_min=3e6),
         job(["Python"], ["SQL"], min_experience_years=2, min_education=SimpleNamespace(name="Pregrado", rank_order=4),
             salary_max=5e6),
@@ -41,24 +41,39 @@ def test_perfect_match_scores_100():
 
 
 def test_missing_skills_and_other_city_lower_the_score():
-    score, reasons, matched = compute_score(ctx(city_id=2), job(["Java", "Spring"], min_experience_years=3))
-    assert score < 40 and not matched
-    assert "Aún no registras las habilidades requeridas para esta vacante" in reasons
+    score, reasons, gaps, matched = compute_score(ctx(city_id=2), job(["Java", "Spring"], min_experience_years=3))
+    assert score < 40 and not matched and not reasons
+    assert gaps == ["No registras las habilidades requeridas: Java, Spring",
+                    "Pide 3 años de experiencia; registras 0 años", "La vacante es en otra ciudad"]
 
 
 def test_skill_names_ignore_case_and_accents():
-    _, _, matched = compute_score(ctx(skills={"atencion al cliente"}), job(["Atención al Cliente"]))
+    matched = compute_score(ctx(skills={"atencion al cliente"}), job(["Atención al Cliente"])).matched_skills
     assert matched == {"Atención al Cliente"}
 
 
 def test_remote_job_counts_as_location_match_anywhere():
-    near, _, _ = compute_score(ctx(city_id=1), job(modality="presencial", city_id=1))
-    remote, reasons, _ = compute_score(ctx(city_id=2), job(modality="remoto", city_id=None))
-    far, _, _ = compute_score(ctx(city_id=2), job(modality="presencial", city_id=1))
+    near = compute_score(ctx(city_id=1), job(modality="presencial", city_id=1)).score
+    remote, reasons, _, _ = compute_score(ctx(city_id=2), job(modality="remoto", city_id=None))
+    far = compute_score(ctx(city_id=2), job(modality="presencial", city_id=1)).score
     assert near == remote > far
     assert "Trabajo 100% remoto" in reasons
 
 
 def test_years_use_decimal_comma():
-    _, reasons, _ = compute_score(ctx(experience_years=5.8), job(min_experience_years=2), audience="empresa")
+    reasons = compute_score(ctx(experience_years=5.8), job(min_experience_years=2), audience="empresa").strengths
     assert "Cumple la experiencia mínima (2 años); registra 5,8 años" in reasons
+
+
+def test_strengths_and_gaps_are_separated():
+    result = compute_score(
+        ctx(skills={"python"}, desired_modality="remoto", desired_salary_min=6e6),
+        job(["Python", "Docker", "AWS"], modality="presencial", city_id=1, salary_max=4e6),
+    )
+    assert "Tienes 1 de 3 habilidades requeridas: Python" in result.strengths
+    assert "Te faltan habilidades requeridas: Docker, AWS" in result.gaps
+    assert "Es presencial y prefieres remoto" in result.gaps
+    assert "El salario está por debajo de tu aspiración" in result.gaps
+    company = compute_score(ctx(city_id=2), job(["Excel"], city_id=1), audience="empresa")
+    assert "No registra las habilidades requeridas: Excel" in company.gaps
+    assert "Vive en otra ciudad y no indicó que acepte trasladarse" in company.gaps
