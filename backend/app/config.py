@@ -21,9 +21,13 @@ class Settings(BaseSettings):
     MAX_LOGIN_ATTEMPTS: int = 3
     LOCK_MINUTES: int = 15
 
+    # Orígenes permitidos cuando las páginas se abren con Live Server (puerto 5500).
+    # Si las sirve el mismo backend no hace falta: página y API están en el mismo sitio.
     FRONTEND_ORIGINS: str = "http://127.0.0.1:5500,http://localhost:5500"
-    # Dirección donde se abre la carpeta frontend/ (para el enlace del correo de recuperación)
-    FRONTEND_URL: str = "http://127.0.0.1:5500/frontend"
+    # El backend también sirve las páginas de frontend/ (abrir http://127.0.0.1:8000)
+    SERVE_FRONTEND: bool = True
+    # Dirección donde se abren las páginas (para el enlace del correo de recuperación)
+    FRONTEND_URL: str = "http://127.0.0.1:8000"
     RESET_TOKEN_MINUTES: int = 30
 
     # Correo (opcional). Si SMTP_HOST está vacío, el correo se imprime en la consola.

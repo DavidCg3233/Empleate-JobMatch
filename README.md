@@ -147,7 +147,12 @@ python -m scripts.seed_demo                # opcional: 3 empresas y 12 vacantes 
 uvicorn main:app --reload
 ```
 
-Luego abre `frontend/index.html` con Live Server. Las pruebas se ejecutan con `python -m pytest`.
+Luego abre **http://127.0.0.1:8000** en cualquier navegador: el mismo backend sirve la API (`/api/...`)
+y las páginas de `frontend/`. No hace falta Live Server (si lo prefieres, también funciona en
+`http://127.0.0.1:5500/frontend/index.html`). No abras los `.html` con doble clic: el navegador bloquea los
+módulos de JavaScript en `file://`.
+
+Las pruebas se ejecutan con `python -m pytest`.
 
 `migrate_skills_catalog` se puede ejecutar varias veces sin duplicar nada; quien ya tenga la base creada
 debe ejecutarlo una vez para tener las sugerencias de habilidades.
