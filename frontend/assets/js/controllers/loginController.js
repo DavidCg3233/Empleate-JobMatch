@@ -24,6 +24,10 @@ if (params.get("reset") === "ok") {
   infoBox.textContent = "Tu contraseña se actualizó. Ya puedes iniciar sesión.";
   infoBox.classList.remove("hidden");
 }
+if (params.get("cuenta") === "eliminada") {
+  infoBox.textContent = "Tu cuenta y tus datos se eliminaron. Gracias por usar Empléate Jobmatch.";
+  infoBox.classList.remove("hidden");
+}
 if (params.get("email")) emailInput.value = params.get("email");
 
 function showError(message) {

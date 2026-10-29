@@ -20,7 +20,7 @@ from app.models.job import Job
 from app.models.match import Match
 from app.models.swipe import ApplicantSwipe, CompanySwipe
 from app.models.user import User
-from app.services import ai_matching_service, storage_service
+from app.services import ai_matching_service, audit_service, storage_service
 from app.services.company_service import get_company, get_owned_job
 from app.services.matching_service import compute_score, load_applicant_contexts
 from app.utils.helpers import normalize_text
@@ -230,6 +230,7 @@ def swipe_candidate(db: Session, user: User, job_id: int, applicant_id: int, act
             else:
                 match.is_active = True
             new_match = True
+            audit_service.record(db, "match", user.id, "vacante", job.id, {"aspirante_id": applicant.id})
 
     try:
         db.commit()

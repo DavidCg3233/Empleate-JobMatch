@@ -145,6 +145,7 @@ pip install -r requirements.txt
 python -m scripts.migrate_skills_catalog   # columnas del catálogo de habilidades + 255 habilidades y herramientas
 python -m scripts.migrate_ai_matching      # columnas de caché para el emparejamiento con IA
 python -m scripts.seed_demo                # opcional: 3 empresas y 12 vacantes de ejemplo (clave Demo1234)
+python -m scripts.create_admin admin@tucorreo.com   # crea el administrador (pide la contraseña)
 uvicorn main:app --reload
 ```
 
@@ -157,6 +158,20 @@ Las pruebas se ejecutan con `python -m pytest`.
 
 `migrate_skills_catalog` se puede ejecutar varias veces sin duplicar nada; quien ya tenga la base creada
 debe ejecutarlo una vez para tener las sugerencias de habilidades.
+
+## Panel de administrador
+
+No hay registro público para el administrador: se crea con `python -m scripts.create_admin correo@dominio.com`
+(la contraseña se pide en la terminal). Volver a ejecutarlo con el mismo correo cambia la contraseña y desbloquea
+la cuenta, así se recupera el acceso. Al iniciar sesión, el administrador entra a `pages/admin/dashboard.html`:
+
+- **Resumen**: aspirantes, empresas, vacantes, matches, decisiones, uso de la IA, registros de los últimos 14 días y actividad reciente.
+- **Usuarios**: buscar por nombre, correo o NIT; activar / desactivar cuentas y quitar el bloqueo por intentos fallidos.
+- **Vacantes**: deshabilitar una vacante que incumpla los términos (deja de verse y la empresa no puede volver a publicarla).
+- **Matches** y **Actividad**: lista de matches y bitácora (`audit_logs`) de registros, inicios de sesión, vacantes, matches y acciones del administrador. No guarda contraseñas ni hojas de vida.
+
+Los aspirantes y las empresas pueden **eliminar su cuenta** desde su perfil (Ley 1581 de 2012): se borran el perfil,
+la hoja de vida, las vacantes, las decisiones y los matches; en la bitácora queda el registro sin datos personales.
 
 ## Emparejamiento con IA (opcional)
 

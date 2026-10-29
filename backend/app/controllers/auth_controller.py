@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas.applicant_schema import CvParseResponse
 from app.schemas.auth_schema import (
     ChangePasswordRequest,
+    DeleteAccountRequest,
     ForgotPasswordRequest,
     LoginRequest,
     LoginResponse,
@@ -18,7 +19,7 @@ from app.schemas.auth_schema import (
     RegisterCompanyRequest,
     ResetPasswordRequest,
 )
-from app.services import auth_service
+from app.services import account_service, auth_service
 from app.utils.helpers import RateLimiter
 
 router = APIRouter(prefix="/api/auth", tags=["Autenticación"])
@@ -89,3 +90,10 @@ def change_password(data: ChangePasswordRequest, user: User = Depends(get_curren
     """Cambia la contraseña de quien tiene la sesión iniciada (aspirante o empresa)."""
     auth_service.change_password(db, user, data.current_password, data.new_password)
     return {"message": "Tu contraseña se actualizó."}
+
+
+@router.delete("/account", response_model=MessageResponse)
+def delete_account(data: DeleteAccountRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Elimina la cuenta del aspirante o de la empresa y todos sus datos (pide la contraseña para confirmar)."""
+    account_service.delete_account(db, user, data.password)
+    return {"message": "Tu cuenta y tus datos se eliminaron."}

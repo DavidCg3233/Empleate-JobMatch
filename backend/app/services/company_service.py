@@ -14,6 +14,7 @@ from app.models.match import Match
 from app.models.swipe import ApplicantSwipe, CompanySwipe
 from app.models.user import User
 from app.schemas.company_schema import CompanyProfileUpdate, JobCreate, JobIn
+from app.services import audit_service
 from app.services.skill_service import get_or_create_skill_id
 
 
@@ -228,6 +229,7 @@ def create_job(db: Session, user: User, data: JobCreate) -> dict:
     db.add(job)
     db.flush()
     _sync_skills(db, job, data)
+    audit_service.record(db, "vacante_creada", user.id, "vacante", job.id, {"titulo": job.title})
     db.commit()
     return get_job(db, user, job.id)
 
@@ -257,6 +259,7 @@ def change_status(db: Session, user: User, job_id: int, status: str) -> dict:
         if job.published_at is None:
             job.published_at = datetime.now()  # primera publicación
 
+    audit_service.record(db, "vacante_estado", user.id, "vacante", job.id, {"de": job.status, "a": status})
     job.status = status
     db.commit()
     return get_job(db, user, job.id)
@@ -269,5 +272,6 @@ def delete_job(db: Session, user: User, job_id: int) -> None:
             409,
             "Esta vacante ya tiene aspirantes o matches, por eso no se puede eliminar. Puedes cerrarla.",
         )
+    audit_service.record(db, "vacante_eliminada", user.id, "vacante", job.id, {"titulo": job.title})
     db.delete(job)
     db.commit()

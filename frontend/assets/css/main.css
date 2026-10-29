@@ -552,3 +552,7 @@ body:has(.save-bar) .toast-container { bottom: 5.5rem; }
   body.has-bottom-nav .toast-container { bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
   body.has-bottom-nav:has(.save-bar) .toast-container { bottom: calc(9.5rem + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Zona de peligro (Eliminar mi cuenta) */
+.danger-zone { border-color: var(--danger); }
+.danger-zone .form-section-title { color: var(--danger); }

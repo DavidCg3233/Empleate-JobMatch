@@ -1,5 +1,5 @@
 // Barra de navegación de las pantallas con sesión (arriba en escritorio, abajo en el celular).
-// Uso: renderNav("empresa", "jobs")  ·  renderApplicantNav("swipe")
+// Uso: renderNav("empresa", "jobs")  ·  renderNav("administrador", "users")  ·  renderApplicantNav("swipe")
 import { getMe } from "../api/authApi.js";
 import { logout } from "../utils/auth.js";
 
@@ -15,6 +15,13 @@ const LINKS = {
     { key: "swipe", href: "swipe.html", icon: "🧭", label: "Candidatos" },
     { key: "matches", href: "matches.html", icon: "💚", label: "Matches" },
     { key: "profile", href: "company.html", icon: "🏢", label: "Empresa" },
+  ],
+  administrador: [
+    { key: "dashboard", href: "dashboard.html", icon: "📊", label: "Resumen" },
+    { key: "users", href: "users.html", icon: "👥", label: "Usuarios" },
+    { key: "jobs", href: "jobs.html", icon: "📋", label: "Vacantes" },
+    { key: "matches", href: "matches.html", icon: "💚", label: "Matches" },
+    { key: "activity", href: "activity.html", icon: "🕑", label: "Actividad" },
   ],
 };
 

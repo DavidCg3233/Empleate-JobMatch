@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vacantes | Empléate Jobmatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="../../favicon.ico" />
+  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/admin.css" />
+  <script src="../../assets/js/utils/theme.js"></script>
+</head>
+<body>
+
+  <main class="container page-main admin-page">
+    <div class="page-header-row">
+      <header class="page-header">
+        <h1 class="page-title">Vacantes</h1>
+        <p class="hint">Todas las vacantes publicadas. Deshabilita una vacante si incumple los términos: deja de verse y la empresa no la puede volver a publicar.</p>
+      </header>
+    </div>
+    <div id="error-box" role="alert" class="alert alert-error hidden"></div>
+
+    <div class="toolbar" role="search">
+      <input id="q" type="search" class="input" placeholder="Cargo o empresa" aria-label="Buscar" maxlength="100" />
+      <select id="status" class="select" aria-label="Estado">
+        <option value="">Todos los estados</option>
+        <option value="activa">Publicadas</option>
+        <option value="pausada">Pausadas</option>
+        <option value="cerrada">Cerradas</option>
+      </select>
+      <select id="enabled" class="select" aria-label="Visibilidad">
+        <option value="">Habilitadas y deshabilitadas</option>
+        <option value="true">Habilitadas</option>
+        <option value="false">Deshabilitadas por el administrador</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Vacante</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Visibilidad</th>
+            <th scope="col" class="num">Interesados</th>
+            <th scope="col" class="num">Matches</th>
+            <th scope="col">Creada</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination" aria-live="polite"></div>
+
+  </main>
+
+  <script type="module" src="../../assets/js/controllers/adminJobsController.js"></script>
+</body>
+</html>

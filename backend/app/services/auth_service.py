@@ -28,7 +28,7 @@ from app.models.password_reset import PasswordReset
 from app.models.role import Role
 from app.models.user import User
 from app.schemas.auth_schema import RegisterApplicantRequest, RegisterCompanyRequest
-from app.services import cv_parser_service, email_service, storage_service
+from app.services import audit_service, cv_parser_service, email_service, storage_service
 from app.services.skill_service import get_or_create_skill_id
 from app.utils.file_validators import validate_cv
 
@@ -146,6 +146,7 @@ def register_applicant(db: Session, data: RegisterApplicantRequest) -> dict:
         db.flush()
 
         _save_applicant_profile(db, applicant.id, data)
+        audit_service.record(db, "registro", user_id, "aspirante", applicant.id)
         db.commit()  # usuario + perfil + CV se guardan juntos o no se guarda nada
     except IntegrityError:
         db.rollback()
@@ -212,6 +213,7 @@ def register_company(db: Session, data: RegisterCompanyRequest) -> dict:
                 contact_email=(data.contact_email or email).lower(),
             )
         )
+        audit_service.record(db, "registro", user_id, "empresa", details={"nombre": data.name})
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -253,6 +255,7 @@ def login(db: Session, email: str, password: str) -> dict:
 
         if attempts >= settings.MAX_LOGIN_ATTEMPTS:
             user.locked_until = now + timedelta(minutes=settings.LOCK_MINUTES)
+            audit_service.record(db, "cuenta_bloqueada", user.id, "user", user.id)
             db.commit()
             raise _error(
                 423,
@@ -271,6 +274,7 @@ def login(db: Session, email: str, password: str) -> dict:
     role_name = user.role.name
     user_id = user.id
     user_email = user.email
+    audit_service.record(db, "inicio_sesion", user_id)
     db.commit()
 
     return _session_payload(user_id, role_name, user_email)
@@ -339,6 +343,7 @@ def reset_password(db: Session, token: str, new_password: str) -> None:
     user.failed_attempts = 0     # si estaba bloqueada por intentos, queda desbloqueada
     user.locked_until = None
     reset.used_at = datetime.now()
+    audit_service.record(db, "contrasena_restablecida", user.id, "user", user.id)
     db.commit()
 
 
@@ -367,4 +372,5 @@ def change_password(db: Session, user: User, current_password: str, new_password
     if verify_password(new_password, user.password_hash):
         raise _error(400, "La nueva contraseña debe ser diferente a la actual.")
     user.password_hash = hash_password(new_password)
+    audit_service.record(db, "contrasena_cambiada", user.id, "user", user.id)
     db.commit()

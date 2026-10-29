@@ -7,25 +7,41 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="../../favicon.ico" />
   <link rel="stylesheet" href="../../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/swipe.css" />
+  <link rel="stylesheet" href="../../assets/css/admin.css" />
   <script src="../../assets/js/utils/theme.js"></script>
 </head>
-<body class="auth-page">
-  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema"></button>
+<body>
 
-  <main class="card auth-card text-center">
-    <h1 class="brand">Empléate <span>Jobmatch</span></h1>
-    <h2 class="mt-3">Panel del administrador</h2>
-    <p id="welcome" class="text-muted"></p>
-    <p class="alert alert-info">En construcción: aquí irá el dashboard de administración.</p>
-    <button id="logout" type="button" class="btn btn-outline btn-block mt-2">Cerrar sesión</button>
+  <main class="container page-main admin-page">
+    <div class="page-header-row">
+      <header class="page-header">
+        <h1 class="page-title">Resumen</h1>
+        <p class="hint">Cómo va la plataforma: usuarios, vacantes, matches y lo último que pasó.</p>
+      </header>
+    </div>
+    <div id="error-box" role="alert" class="alert alert-error hidden"></div>
+
+    <section class="stats-grid" id="stats" aria-label="Indicadores">
+      <div class="results-empty"><span class="spinner" aria-hidden="true"></span></div>
+    </section>
+
+    <div class="panel-grid">
+      <section class="chart-card" aria-labelledby="signups-title">
+        <h2 class="panel-title" id="signups-title">Registros de los últimos 14 días</h2>
+        <div id="signups"></div>
+      </section>
+      <section class="chart-card" aria-labelledby="activity-title">
+        <h2 class="panel-title" id="activity-title">Actividad reciente</h2>
+        <ul class="activity-list" id="activity"></ul>
+        <a href="activity.html" class="btn btn-ghost btn-sm mt-2">Ver toda la actividad</a>
+      </section>
+    </div>
+
   </main>
 
-  <script type="module">
-    import { logout, requireRole } from "../../assets/js/utils/auth.js";
-    requireRole("administrador");
-    document.getElementById("welcome").textContent = "Sesión iniciada como " + (localStorage.getItem("email") || "");
-    document.getElementById("logout").addEventListener("click", logout);
-  </script>
+  <script type="module" src="../../assets/js/controllers/adminController.js"></script>
 </body>
 </html>

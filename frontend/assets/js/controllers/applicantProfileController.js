@@ -3,6 +3,7 @@ import { downloadMyCv, getApplicantProfile, updateApplicantProfile, uploadApplic
 import { getCities, getEducationLevels, getLanguages } from "../api/catalogApi.js";
 import { createMoneyInput } from "../components/moneyInput.js";
 import { renderApplicantNav } from "../components/navbar.js";
+import { mountDeleteAccount } from "../components/deleteAccount.js";
 import { mountChangePassword } from "../components/passwordForm.js";
 import { createProfileEditor } from "../components/profileEditor.js";
 import { showToast } from "../components/toast.js";
@@ -348,6 +349,7 @@ async function init() {
     fill(profile);
     document.getElementById("profile-content").hidden = false;
     mountChangePassword(document.getElementById("password-box"));
+    mountDeleteAccount(document.getElementById("delete-box"), { role: "aspirante" });
     setDirty(false);
   } catch (err) {
     showError(err.message);

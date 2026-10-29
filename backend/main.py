@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.config import BASE_DIR, settings
 from app.controllers import (
+    admin_controller,
     applicant_controller,
     auth_controller,
     catalog_controller,
@@ -19,7 +20,7 @@ from app.controllers import (
 )
 from app.database import get_db
 
-app = FastAPI(title="Empléate Jobmatch API", version="0.7.0")
+app = FastAPI(title="Empléate Jobmatch API", version="0.8.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +40,7 @@ app.include_router(job_controller.company_router)
 app.include_router(swipe_controller.router)
 app.include_router(match_controller.router)
 app.include_router(matching_controller.router)
+app.include_router(admin_controller.router)
 
 
 @app.get("/api/health", tags=["Sistema"])

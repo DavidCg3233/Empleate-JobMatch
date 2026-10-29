@@ -16,7 +16,7 @@ from app.models.job import Job, JobSkill
 from app.models.match import Match
 from app.models.swipe import ApplicantSwipe, CompanySwipe
 from app.models.user import User
-from app.services import ai_matching_service
+from app.services import ai_matching_service, audit_service
 from app.services.matching_service import ApplicantContext, compute_score, load_applicant_context
 
 FEED_SIZE = 20
@@ -355,6 +355,7 @@ def swipe_job(db: Session, user: User, job_id: int, action: str) -> dict:
             else:
                 match.is_active = True
             new_match = True
+            audit_service.record(db, "match", user.id, "vacante", job_id, {"aspirante_id": applicant.id})
 
     try:
         db.commit()

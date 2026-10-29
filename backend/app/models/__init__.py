@@ -16,3 +16,4 @@ from app.models.job import ContractType, Job, JobSkill  # noqa: F401
 from app.models.swipe import ApplicantSwipe, CompanySwipe  # noqa: F401
 from app.models.match import Match  # noqa: F401
 from app.models.match_score import ApplicantEmbedding, JobEmbedding, MatchScore  # noqa: F401
+from app.models.audit_log import AuditLog  # noqa: F401

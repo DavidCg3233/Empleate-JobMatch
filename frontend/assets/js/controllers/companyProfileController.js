@@ -2,6 +2,7 @@
 import { getCities, getIndustries } from "../api/catalogApi.js";
 import { getCompanyProfile, updateCompanyProfile } from "../api/companyApi.js";
 import { renderNav } from "../components/navbar.js";
+import { mountDeleteAccount } from "../components/deleteAccount.js";
 import { mountChangePassword } from "../components/passwordForm.js";
 import { showToast } from "../components/toast.js";
 import { requireRole } from "../utils/auth.js";
@@ -153,6 +154,8 @@ async function init() {
     form.hidden = false;
     document.getElementById("password-section").hidden = false;
     mountChangePassword(document.getElementById("password-box"));
+    document.getElementById("delete-section").hidden = false;
+    mountDeleteAccount(document.getElementById("delete-box"), { role: "empresa" });
   } catch (err) {
     showError(err.message);
   } finally {

@@ -45,3 +45,8 @@ export function changePassword(currentPassword, newPassword) {
     body: { current_password: currentPassword, new_password: newPassword },
   });
 }
+
+// ---------- Eliminar la cuenta (aspirante o empresa) ----------
+export function deleteAccount(password) {
+  return http("/auth/account", { method: "DELETE", body: { password } });
+}
