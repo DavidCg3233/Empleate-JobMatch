@@ -159,6 +159,10 @@ Las pruebas se ejecutan con `python -m pytest`.
 `migrate_skills_catalog` se puede ejecutar varias veces sin duplicar nada; quien ya tenga la base creada
 debe ejecutarlo una vez para tener las sugerencias de habilidades.
 
+## Despliegue
+
+Para publicar la versión beta (Vercel, Railway y Docker), sigue [DESPLIEGUE.md](DESPLIEGUE.md).
+
 ## Panel de administrador
 
 No hay registro público para el administrador: se crea con `python -m scripts.create_admin correo@dominio.com`

@@ -1,0 +1,13 @@
+# Secretos: las claves se configuran como variables en Railway, nunca dentro de la imagen
+.env
+
+# Se reinstala dentro de la imagen
+venv/
+
+# Archivos de usuarios: viven en el volumen de Railway
+uploads/
+
+# No hacen falta para ejecutar la API
+tests/
+__pycache__/
+*.pyc
