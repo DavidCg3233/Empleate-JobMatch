@@ -275,13 +275,14 @@ function renderReview(result) {
   });
   skipBtn.addEventListener("click", () => { cvReview.hidden = true; });
 
-  cvReview.replaceChildren(
+  // replaceChildren escribiría "null" como texto: las secciones vacías se quitan antes
+  cvReview.replaceChildren(...[
     el("p", {}, el("strong", { textContent: "Encontramos en tu nueva hoja de vida: " }),
       found.length ? found.join(", ") : "pocos datos (puede que el archivo tenga un formato difícil de leer)."),
     data.skills.length ? el("div", { class: "chips" }, data.skills.slice(0, 12).map((s) => el("span", { class: "chip", textContent: s }))) : null,
     el("p", { class: "hint", textContent: "Si los usas, reemplazamos tu experiencia y estudios, agregamos las habilidades e idiomas nuevos y completamos los campos vacíos. Nada se guarda hasta que presiones \"Guardar perfil\"." }),
     el("div", { class: "row" }, useBtn, skipBtn),
-  );
+  ].filter(Boolean));
   cvReview.hidden = false;
 }
 

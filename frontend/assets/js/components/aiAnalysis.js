@@ -20,7 +20,8 @@ function renderResult(box, result, audience) {
     ? (result.advice ? el("p", { class: "ai-advice", textContent: result.advice }) : null)
     : (result.interview_questions.length ? list(result.interview_questions, "❓") : null);
 
-  box.replaceChildren(
+  // replaceChildren escribiría "null" como texto: las secciones vacías se quitan antes
+  box.replaceChildren(...[
     el("div", { class: "ai-head" },
       el("span", { class: `score-badge score-inline ${scoreClass(result.score)}`, title: "Puntaje de la IA", textContent: `${result.score}%` }),
       el("p", { class: "ai-summary", textContent: result.summary }),
@@ -29,7 +30,7 @@ function renderResult(box, result, audience) {
     result.gaps.length ? el("div", { class: "reason-group is-con" }, el("p", { class: "reason-title", textContent: t.cons }), list(result.gaps, "✗")) : null,
     extra ? el("div", {}, el("p", { class: "reason-title", textContent: t.extra }), extra) : null,
     el("p", { class: "hint ai-note", textContent: `Generado con IA${result.generated_at ? ` el ${formatDate(result.generated_at)}` : ""}. Puede contener errores: úsalo como apoyo, no como decisión final.` }),
-  );
+  ].filter(Boolean));
 }
 
 export function aiAnalysisSection(loader, audience = "aspirante") {
