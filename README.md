@@ -5,10 +5,18 @@ las dos partes dicen que sí a la misma vacante, se crea un **match** y se compa
 
 **Versión beta:** https://empleate-jobmatch-frontend.vercel.app
 
-| Documento | Contenido |
+## Documentación
+
+| Guía | Contenido |
 |---|---|
-| [DOCUMENTACION.md](DOCUMENTACION.md) | Explicación detallada: arquitectura, módulos, flujos, base de datos, API y seguridad |
-| [DESPLIEGUE.md](DESPLIEGUE.md) | Cómo publicar la aplicación en Vercel y Railway |
+| [1. Qué hace la app](docs/01-que-hace-la-app.md) | El problema que resuelve y lo que puede hacer cada rol, paso a paso |
+| [2. Carpetas y archivos](docs/02-carpetas-y-archivos.md) | Para qué sirve cada carpeta y cada archivo |
+| [3. Cómo funciona por dentro](docs/03-como-funciona-por-dentro.md) | Peticiones, capas, seguridad, compatibilidad, IA, base de datos y API |
+| [4. Infraestructura y publicación](docs/04-infraestructura-y-publicacion.md) | GitHub, Railway y Vercel: cómo se conectan, cómo se opera y qué hacer si falla |
+| [5. Trabajo local y cambios](docs/05-trabajo-local-y-cambios.md) | Instalar, probar y publicar cambios sin romper producción |
+| [DESPLIEGUE.md](DESPLIEGUE.md) | Crear la publicación desde cero en Railway y Vercel |
+
+[DOCUMENTACION.md](DOCUMENTACION.md) reúne este índice con un resumen de la arquitectura.
 
 ## Funciones principales
 
@@ -38,9 +46,10 @@ las dos partes dicen que sí a la misma vacante, se crea un **match** y se compa
 ```text
 Empleate-JobMatch/
 ├── README.md
-├── DOCUMENTACION.md                  # Explicación detallada del programa
+├── DOCUMENTACION.md                  # Índice de la documentación
 ├── DESPLIEGUE.md                     # Guía de publicación
 ├── Empleate JObMatch database.sql    # Crea la base de datos, las tablas y los catálogos
+├── docs/                             # Guías detalladas
 │
 ├── backend/
 │   ├── main.py                       # Punto de entrada de FastAPI
@@ -153,11 +162,12 @@ de contacto. Para el emparejamiento solo se envía el perfil profesional, sin no
 
 Guardar archivos o hacer `commit` no cambia la aplicación publicada. Producción se actualiza cuando el código llega
 a la rama `main` de GitHub. Los cambios en tablas y variables de entorno no se aplican solos: consulta
-[Pasar cambios a producción](DOCUMENTACION.md#12-pasar-cambios-a-producción).
+[Llevar un cambio a producción](docs/05-trabajo-local-y-cambios.md#llevar-un-cambio-a-producción).
 
 ## Limitaciones actuales
 
 - La recuperación de contraseña en producción no envía correos: el enlace aparece en los logs de Railway.
 - Los términos y la política de datos todavía tienen campos sin completar.
 
-La lista completa está en [Limitaciones conocidas](DOCUMENTACION.md#13-limitaciones-conocidas).
+La lista completa está en
+[Limitaciones de la infraestructura actual](docs/04-infraestructura-y-publicacion.md#limitaciones-de-la-infraestructura-actual).
