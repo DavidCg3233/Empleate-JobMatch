@@ -349,6 +349,8 @@ CREATE TABLE matches (
   applicant_id  INT UNSIGNED NOT NULL,
   matched_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   is_active     TINYINT(1) NOT NULL DEFAULT 1,
+  stage         ENUM('match','en_revision','entrevista','seleccionado','descartado') NOT NULL DEFAULT 'match',
+  stage_updated_at DATETIME NULL,
   PRIMARY KEY (id),
   UNIQUE KEY uq_matches (job_id, applicant_id),
   KEY idx_matches_applicant (applicant_id),

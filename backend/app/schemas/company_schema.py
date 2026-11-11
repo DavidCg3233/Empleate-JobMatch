@@ -6,6 +6,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, EmailStr, Field, StringConstraints, field_validator, model_validator
 
 from app.schemas.auth_schema import WEBSITE_RE, CompanySize, _check_phone, _empty_to_none
+from app.schemas.swipe_schema import MatchStage
 
 Modality = Literal["presencial", "remoto", "hibrido"]
 JobStatus = Literal["activa", "pausada", "cerrada"]
@@ -262,6 +263,8 @@ class JobBrief(BaseModel):
 class CompanyMatchOut(BaseModel):
     match_id: int
     matched_at: datetime
+    stage: MatchStage
+    stage_updated_at: datetime | None
     job: JobBrief
     candidate: CandidateOut
     contact: CandidateContact

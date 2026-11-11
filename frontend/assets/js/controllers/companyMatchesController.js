@@ -1,6 +1,7 @@
 // Empresa: matches con datos de contacto y hoja de vida del aspirante.
-import { downloadMatchCv, getCompanyMatches, listCompanyJobs } from "../api/companyApi.js";
+import { downloadMatchCv, getCompanyMatches, listCompanyJobs, updateMatchStage } from "../api/companyApi.js";
 import { openCandidateDetail } from "../components/candidateCard.js";
+import { STAGE_OPTIONS, stageBar, stageLabel } from "../components/matchStage.js";
 import { renderNav } from "../components/navbar.js";
 import { showToast } from "../components/toast.js";
 import { requireRole } from "../utils/auth.js";
@@ -23,6 +24,42 @@ async function downloadCv(match) {
   }
 }
 
+/** Barra de la etapa y selector para cambiarla. */
+function stageControl(match) {
+  const selectId = `stage-${match.match_id}`;
+  let bar = stageBar(match.stage, "empresa", match.stage_updated_at);
+  const select = el("select", { id: selectId, class: "select select-sm" },
+    ...STAGE_OPTIONS.map((o) => el("option", { value: o.value, textContent: o.label, selected: o.value === match.stage })));
+
+  select.addEventListener("change", async () => {
+    const previous = match.stage;
+    select.disabled = true;
+    try {
+      const result = await updateMatchStage(match.match_id, select.value);
+      match.stage = result.stage;
+      match.stage_updated_at = result.stage_updated_at;
+      const next = stageBar(match.stage, "empresa", match.stage_updated_at);
+      bar.replaceWith(next);
+      bar = next;
+      showToast(`Etapa actualizada: ${stageLabel(match.stage, "empresa")}`, "success");
+    } catch (err) {
+      select.value = previous;
+      showToast(err.message, "error");
+    } finally {
+      select.disabled = false;
+    }
+  });
+
+  return el("div", { class: "match-stage" },
+    el("div", { class: "match-stage-head" },
+      el("p", { class: "card-section-title", textContent: "Proceso de selección" }),
+      el("label", { class: "match-stage-field", for: selectId },
+        el("span", { class: "hint", textContent: "Etapa:" }), select),
+    ),
+    bar,
+  );
+}
+
 function matchCard(match) {
   const { contact, candidate, job } = match;
   const cvBtn = el("button", { type: "button", class: "btn btn-outline btn-sm", textContent: "📄 Hoja de vida", disabled: !contact.has_cv,
@@ -43,6 +80,7 @@ function matchCard(match) {
       ),
       el("span", { class: `score-badge score-inline ${scoreClass(candidate.score)}`, title: "Compatibilidad", textContent: `${candidate.score}%` }),
     ),
+    stageControl(match),
     el("div", { class: "match-contact" },
       el("p", { class: "card-section-title", textContent: "Contacto" }),
       el("p", {}, "✉️ ", el("a", { href: `mailto:${contact.email}`, textContent: contact.email })),

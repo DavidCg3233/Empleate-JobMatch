@@ -13,9 +13,10 @@ las dos partes dicen que sí a la misma vacante, se crea un **match** y se compa
 ## Funciones principales
 
 - **Aspirantes:** registro con lectura automática de la hoja de vida, tarjetas de vacantes, buscador con filtros,
-  porcentaje de compatibilidad con razones a favor y en contra, y matches.
-- **Empresas:** perfil, publicación y gestión de vacantes, revisión de candidatos y descarga de la hoja de vida
-  después del match.
+  porcentaje de compatibilidad con razones a favor y en contra, y matches con una barra que muestra la etapa del
+  proceso.
+- **Empresas:** perfil, publicación y gestión de vacantes, revisión de candidatos, etapa de cada match (en revisión,
+  entrevista, seleccionado o descartado) y descarga de la hoja de vida después del match.
 - **Administrador:** resumen, usuarios, vacantes, matches y bitácora de actividad.
 - **IA opcional:** lectura de hojas de vida, afinidad semántica y análisis de cada pareja aspirante-vacante.
   Sin IA, la aplicación sigue funcionando con reglas.
@@ -116,8 +117,12 @@ Necesitas Python y MySQL instalados. Tu copia local usa su propia base de datos:
 
 No abras los `.html` con doble clic: el navegador bloquea los módulos de JavaScript en `file://`.
 
-Si tu base de datos es anterior a las columnas de caché de la IA, ejecuta una vez
-`python -m scripts.migrate_ai_matching`. Una base nueva ya las incluye.
+Si tu base de datos se creó antes de estas funciones, ejecuta una vez cada migración. Una base nueva ya las incluye.
+
+```powershell
+python -m scripts.migrate_ai_matching    # columnas de caché de la IA
+python -m scripts.migrate_match_stages   # etapas del proceso después del match
+```
 
 ## Pruebas
 

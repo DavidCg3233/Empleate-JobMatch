@@ -31,4 +31,7 @@ export const undoCandidateSwipe = (jobId, applicantId) =>
 
 // ---------- Matches ----------
 export const getCompanyMatches = (jobId) => http(`/matches/company${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`);
-export const downloadMatchCv = (matchId) => downloadFile(`/matches/${encodeURIComponent(matchId)}/cv`, "hoja_de_vida");
+/** stage: "match" | "en_revision" | "entrevista" | "seleccionado" | "descartado" */
+export const updateMatchStage = (matchId, stage) =>
+  http(`/matches/${encodeURIComponent(matchId)}/stage`, { method: "PATCH", body: { stage } });
+export const downloadMatchCv =(matchId) => downloadFile(`/matches/${encodeURIComponent(matchId)}/cv`, "hoja_de_vida");

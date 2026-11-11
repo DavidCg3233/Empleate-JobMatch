@@ -124,6 +124,7 @@ Scripts que se ejecutan a mano desde `backend/`:
 | `python -m scripts.create_admin correo` | Crea el administrador o le cambia la contraseña y lo desbloquea |
 | `python -m scripts.migrate_skills_catalog` | Prepara y carga el catálogo de habilidades. Se puede repetir sin duplicar datos |
 | `python -m scripts.migrate_ai_matching` | Agrega las columnas de caché de la IA a una base anterior |
+| `python -m scripts.migrate_match_stages` | Agrega las etapas del proceso a la tabla `matches` de una base anterior |
 | `python -m scripts.seed_demo` | Crea datos de ejemplo con una contraseña conocida. **No usar en producción** |
 | `python -m scripts.seed_demo --borrar` | Borra los datos de ejemplo |
 
@@ -189,6 +190,21 @@ sequenceDiagram
 El orden no importa: el match se crea cuando llega el segundo "sí". La empresa ve primero a los aspirantes
 interesados, y después a otros que estén buscando empleo, ordenados por compatibilidad. No se le vuelve a mostrar a
 quien ya revisó para esa vacante ni a quien rechazó esa vacante.
+
+### Etapas después del match
+
+Cada match tiene una etapa que la empresa cambia desde **Matches**, y que el aspirante ve como una barra de pasos
+en **Mis matches**:
+
+```text
+Match  ->  En revisión  ->  Entrevista  ->  Seleccionado o Descartado
+```
+
+- Un match nuevo empieza en **Match**.
+- La empresa puede elegir cualquier etapa, también volver atrás para corregir un error.
+- Al aspirante, **Descartado** se le muestra como **No seleccionado**, con un mensaje amable.
+- Cada cambio queda en la bitácora del administrador como "Cambio de etapa del proceso".
+- La etapa se guarda en las columnas `stage` y `stage_updated_at` de la tabla `matches`.
 
 Las decisiones se pueden deshacer mientras no haya un match. Con un match activo, ya no se pueden deshacer ni cambiar
 a "no me interesa". La empresa solo puede descargar la hoja de vida de aspirantes con los que tiene match.
@@ -298,7 +314,7 @@ Con el backend encendido, la documentación interactiva está en `/docs`. Estas 
 | `/api/applicant` | Aspirante | Perfil y hoja de vida |
 | `/api/jobs` | Aspirante | Tarjetas, búsqueda y detalle de vacantes |
 | `/api/swipes` | Aspirante y empresa | Registrar o deshacer decisiones |
-| `/api/matches` | Aspirante y empresa | Consultar matches y descargar hojas de vida |
+| `/api/matches` | Aspirante y empresa | Consultar matches, cambiar su etapa (empresa) y descargar hojas de vida |
 | `/api/matching` | Público el estado; aspirante y empresa el análisis | Estado y análisis de la IA |
 | `/api/company` | Empresa | Perfil de la empresa |
 | `/api/company/jobs` | Empresa | Gestión de vacantes y candidatos |

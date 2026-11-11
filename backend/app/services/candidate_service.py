@@ -1,5 +1,6 @@
 """Lado empresa del match: candidatos para una vacante, me interesa / no me interesa,
 matches con datos de contacto y descarga de la hoja de vida."""
+from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import exists, or_, select
@@ -26,6 +27,8 @@ from app.services.matching_service import compute_score, load_applicant_contexts
 from app.utils.helpers import normalize_text
 
 FEED_SIZE = 20
+STAGE_LABEL = {"match": "Match", "en_revision": "En revisión", "entrevista": "Entrevista",
+               "seleccionado": "Seleccionado", "descartado": "Descartado"}
 OTHER_CANDIDATES = 300  # aspirantes que no han marcado la vacante y se puntúan para sugerirlos
 PROFICIENCY_LABEL = {"basico": "Básico", "intermedio": "Intermedio", "avanzado": "Avanzado", "nativo": "Nativo"}
 
@@ -298,6 +301,8 @@ def get_company_matches(db: Session, user: User, job_id: int | None = None) -> l
         {
             "match_id": match.id,
             "matched_at": match.matched_at,
+            "stage": match.stage or "match",
+            "stage_updated_at": match.stage_updated_at,
             "job": {"id": job.id, "title": job.title, "status": job.status},
             "candidate": profiles[(job.id, applicant.id)],
             "contact": {
@@ -309,6 +314,31 @@ def get_company_matches(db: Session, user: User, job_id: int | None = None) -> l
         }
         for match, job, applicant, email in rows
     ]
+
+
+def update_match_stage(db: Session, user: User, match_id: int, stage: str) -> dict:
+    """La empresa cambia la etapa del proceso (en revisión, entrevista, seleccionado o descartado).
+    Se permite cualquier etapa, también volver atrás, para corregir un error."""
+    company = get_company(db, user)
+    match = db.scalar(
+        select(Match)
+        .join(Job, Job.id == Match.job_id)
+        .where(Match.id == match_id, Match.is_active.is_(True), Job.company_id == company.id)
+    )
+    if match is None:
+        raise api_error(404, "El match no existe.")
+
+    if match.stage != stage:
+        previous = match.stage
+        match.stage = stage
+        match.stage_updated_at = datetime.now()
+        audit_service.record(
+            db, "estado_match", user.id, "match", match.id,
+            {"vacante_id": match.job_id, "aspirante_id": match.applicant_id,
+             "de": STAGE_LABEL.get(previous, previous), "a": STAGE_LABEL[stage]},
+        )
+        db.commit()
+    return {"match_id": match.id, "stage": match.stage, "stage_updated_at": match.stage_updated_at}
 
 
 def get_match_cv(db: Session, user: User, match_id: int) -> tuple[Path, str]:

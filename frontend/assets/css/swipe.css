@@ -371,3 +371,49 @@ body.modal-open { overflow: hidden; }
 .reason-group .detail-reasons li { margin-bottom: 0.15rem; }
 .reason-group.is-pro .reason-title, .reason-group.is-pro .detail-reasons span, .reason-group.is-pro .ai-list span { color: var(--success); }
 .reason-group.is-con .reason-title, .reason-group.is-con .detail-reasons span, .reason-group.is-con .ai-list span { color: var(--danger); }
+
+/* =====================================================================
+   Etapa del proceso después del match (barra de pasos y selector)
+   ===================================================================== */
+.match-stage { display: flex; flex-direction: column; gap: 0.6rem; }
+.match-stage-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+.match-stage-head .card-section-title { margin: 0; }
+.match-stage-field { display: flex; align-items: center; gap: 0.4rem; margin: 0; }
+.select.select-sm { width: auto; padding: 0.4rem 0.75rem; font-size: 0.9rem; }
+
+.stage-bar { padding: 0.25rem 0; }
+.stage-steps { display: flex; list-style: none; margin: 0; padding: 0; }
+.stage-step {
+  flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  text-align: center; font-size: 0.8rem; color: var(--text-muted);
+}
+/* Línea que une cada paso con el anterior */
+.stage-step::before {
+  content: ""; position: absolute; top: 13px; right: 50%; width: 100%; height: 3px;
+  background: var(--border); z-index: 0;
+}
+.stage-step:first-child::before { display: none; }
+.stage-dot {
+  position: relative; z-index: 1; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: 0.8rem;
+  background: var(--surface-2); border: 2px solid var(--border); color: var(--text-muted);
+}
+.stage-step.is-done::before,
+.stage-step.is-current::before { background: var(--primary); }
+.stage-step.is-done .stage-dot { background: var(--primary); border-color: var(--primary); color: var(--surface); }
+.stage-step.is-current .stage-dot { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+.stage-step.is-current .stage-label { color: var(--text); font-weight: 700; }
+
+/* Resultado: verde si fue seleccionado, rojo si no */
+.stage-bar.is-selected .stage-step.is-current .stage-dot { background: var(--success); border-color: var(--success); color: var(--surface); }
+.stage-bar.is-selected .stage-step.is-current::before { background: var(--success); }
+.stage-bar.is-rejected .stage-step.is-current .stage-dot { background: var(--danger); border-color: var(--danger); color: var(--surface); }
+.stage-bar.is-rejected .stage-step.is-current::before { background: var(--danger); }
+
+.stage-message { margin: 0.6rem 0 0; font-size: 0.9rem; text-align: center; }
+
+@media (max-width: 420px) {
+  .stage-step { font-size: 0.72rem; }
+  .stage-dot { width: 24px; height: 24px; }
+  .stage-step::before { top: 11px; }
+}

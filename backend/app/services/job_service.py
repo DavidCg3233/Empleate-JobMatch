@@ -421,6 +421,8 @@ def get_my_matches(db: Session, user: User) -> dict:
             {
                 "match_id": match.id,
                 "matched_at": match.matched_at,
+                "stage": match.stage or "match",
+                "stage_updated_at": match.stage_updated_at,
                 "job": _serialize(job, ctx, catalogs, "like", True, _is_open(job, active_companies), semantic=semantic.get(job.id)),
                 "contact": {
                     "name": job.company.contact_name,

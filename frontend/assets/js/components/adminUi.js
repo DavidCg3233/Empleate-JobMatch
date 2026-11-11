@@ -13,6 +13,7 @@ const ACTION_LABEL = {
   vacante_estado: "Cambio de estado de vacante",
   vacante_eliminada: "Vacante eliminada",
   match: "Nuevo match",
+  estado_match: "Cambio de etapa del proceso",
   usuario_activado: "Cuenta activada",
   usuario_desactivado: "Cuenta desactivada",
   usuario_desbloqueado: "Cuenta desbloqueada",

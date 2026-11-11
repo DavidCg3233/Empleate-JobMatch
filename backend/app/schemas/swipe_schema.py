@@ -5,6 +5,9 @@ from pydantic import BaseModel
 
 from app.schemas.job_schema import JobOut
 
+# Etapas del proceso después del match (mismo orden que app.models.match.MATCH_STAGES)
+MatchStage = Literal["match", "en_revision", "entrevista", "seleccionado", "descartado"]
+
 
 class SwipeRequest(BaseModel):
     job_id: int
@@ -29,8 +32,20 @@ class CompanyContact(BaseModel):
 class MatchItem(BaseModel):
     match_id: int
     matched_at: datetime
+    stage: MatchStage
+    stage_updated_at: datetime | None
     job: JobOut
     contact: CompanyContact
+
+
+class MatchStageIn(BaseModel):
+    stage: MatchStage
+
+
+class MatchStageOut(BaseModel):
+    match_id: int
+    stage: MatchStage
+    stage_updated_at: datetime | None
 
 
 class ApplicantMatchesOut(BaseModel):

@@ -339,6 +339,66 @@ def test_company_like_on_interested_applicant_creates_match(client, hiring):
     assert len(client.get("/api/matches/company", params={"job_id": job_id}, headers=company).json()) == 1
 
 
+# =====================================================================
+# Etapa del proceso después del match
+# =====================================================================
+def make_match(client, hiring) -> int:
+    r = client.post("/api/swipes/candidates", headers=hiring["company"],
+                    json={"job_id": hiring["job"]["id"], "applicant_id": hiring["ids"]["interesada"], "action": "like"})
+    assert r.json()["matched"] is True
+    return r.json()["match_id"]
+
+
+def test_match_stage_flow(client, hiring, db_session):
+    match_id = make_match(client, hiring)
+    company, applicant = hiring["company"], hiring["interested"]
+
+    # Recién creado, el match está en la etapa inicial para los dos
+    company_match = client.get("/api/matches/company", headers=company).json()[0]
+    assert company_match["stage"] == "match" and company_match["stage_updated_at"] is None
+    assert client.get("/api/matches/applicant", headers=applicant).json()["matches"][0]["stage"] == "match"
+
+    # La empresa avanza por cada etapa y el aspirante ve el cambio
+    for stage in ("en_revision", "entrevista", "seleccionado"):
+        r = client.patch(f"/api/matches/{match_id}/stage", json={"stage": stage}, headers=company)
+        assert r.status_code == 200, r.text
+        assert r.json()["match_id"] == match_id and r.json()["stage"] == stage and r.json()["stage_updated_at"]
+        seen = client.get("/api/matches/applicant", headers=applicant).json()["matches"][0]
+        assert seen["stage"] == stage and seen["stage_updated_at"]
+    assert client.get("/api/matches/company", headers=company).json()[0]["stage"] == "seleccionado"
+
+    # Se puede corregir: volver atrás o descartar
+    r = client.patch(f"/api/matches/{match_id}/stage", json={"stage": "descartado"}, headers=company)
+    assert r.status_code == 200 and r.json()["stage"] == "descartado"
+
+    # Repetir la misma etapa no crea otro registro en la bitácora
+    client.patch(f"/api/matches/{match_id}/stage", json={"stage": "descartado"}, headers=company)
+    with db_session() as db:
+        logs = db.query(m.AuditLog).filter_by(action="estado_match").order_by(m.AuditLog.id).all()
+        assert len(logs) == 4
+        assert logs[-1].details["de"] == "Seleccionado" and logs[-1].details["a"] == "Descartado"
+
+    # El match sigue activo: contacto y hoja de vida disponibles
+    assert len(client.get("/api/matches/company", headers=company).json()) == 1
+
+
+def test_match_stage_permissions_and_validation(client, hiring):
+    match_id = make_match(client, hiring)
+    url = f"/api/matches/{match_id}/stage"
+
+    assert client.patch(url, json={"stage": "contratado"}, headers=hiring["company"]).status_code == 422
+    assert client.patch(url, json={"stage": "entrevista"}).status_code == 401
+    # El aspirante no puede cambiar su propia etapa
+    assert client.patch(url, json={"stage": "seleccionado"}, headers=hiring["interested"]).status_code == 403
+    # Otra empresa no puede tocar un match que no es suyo
+    other = register_company(client, email="otra@empresa.com", tax_id="900999888-1", name="Otra Empresa")
+    assert client.patch(url, json={"stage": "entrevista"}, headers=other).status_code == 404
+    assert client.patch("/api/matches/99999/stage", json={"stage": "entrevista"},
+                        headers=hiring["company"]).status_code == 404
+    # Nada de lo anterior cambió la etapa
+    assert client.get("/api/matches/company", headers=hiring["company"]).json()[0]["stage"] == "match"
+
+
 def test_company_likes_first_then_applicant_likes(client, hiring, db_session):
     """La empresa puede dar el primer paso con un perfil sugerido; el match llega cuando el aspirante dice que sí."""
     job_id, ids, company = hiring["job"]["id"], hiring["ids"], hiring["company"]

@@ -7,7 +7,7 @@ from app.core.dependencies import require_role
 from app.database import get_db
 from app.models.user import User
 from app.schemas.company_schema import CompanyMatchOut
-from app.schemas.swipe_schema import ApplicantMatchesOut
+from app.schemas.swipe_schema import ApplicantMatchesOut, MatchStageIn, MatchStageOut
 from app.services import candidate_service, job_service
 
 router = APIRouter(prefix="/api/matches", tags=["Matches"])
@@ -27,6 +27,14 @@ def company_matches(
 ):
     """Matches de la empresa (de todas sus vacantes o de una), con los datos de contacto del aspirante."""
     return candidate_service.get_company_matches(db, user, job_id)
+
+
+@router.patch("/{match_id}/stage", response_model=MatchStageOut)
+def update_match_stage(
+    match_id: int, data: MatchStageIn, user: User = Depends(require_role("empresa")), db: Session = Depends(get_db)
+):
+    """La empresa actualiza la etapa del proceso con el aspirante. El aspirante la ve en sus matches."""
+    return candidate_service.update_match_stage(db, user, match_id, data.stage)
 
 
 @router.get("/{match_id}/cv", response_class=FileResponse)

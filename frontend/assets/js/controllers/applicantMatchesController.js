@@ -2,6 +2,7 @@
 import { getMyMatches } from "../api/applicantApi.js";
 import { swipeJob, undoSwipe } from "../api/swipeApi.js";
 import { openJobDetail } from "../components/jobDetail.js";
+import { stageBadgeClass, stageBar, stageLabel } from "../components/matchStage.js";
 import { renderApplicantNav } from "../components/navbar.js";
 import { createJobItem } from "../components/swipecard.js";
 import { showToast } from "../components/toast.js";
@@ -55,7 +56,9 @@ function contactBlock(contact) {
   );
 }
 
-function matchItem({ matched_at: matchedAt, job, contact }) {
+function matchItem({ matched_at: matchedAt, stage = "match", stage_updated_at: stageUpdatedAt, job, contact }) {
+  // Con un resultado (seleccionado o no) se muestra el resultado aunque la vacante ya esté cerrada
+  const finished = stage === "seleccionado" || stage === "descartado";
   return el("article", { class: "match-item match-card" },
     el("div", { class: "match-item-main" },
       el("span", { class: "avatar", "aria-hidden": "true", textContent: initials(job.company.name) }),
@@ -64,10 +67,11 @@ function matchItem({ matched_at: matchedAt, job, contact }) {
         el("p", { class: "card-subtitle", textContent: job.company.name }),
         el("p", { class: "hint", textContent: `Match el ${formatDate(matchedAt)}` }),
       ),
-      job.is_open
-        ? el("span", { class: "badge badge-success", textContent: "💚 Match" })
+      job.is_open || finished
+        ? el("span", { class: stageBadgeClass(stage), textContent: stage === "match" ? "💚 Match" : stageLabel(stage, "aspirante") })
         : el("span", { class: "badge", textContent: "Vacante cerrada" }),
     ),
+    stageBar(stage, "aspirante", stageUpdatedAt),
     contactBlock(contact),
     el("div", { class: "row" },
       el("button", { type: "button", class: "btn btn-secondary btn-sm", textContent: "Ver vacante", onclick: () => openJobDetail(job) }),
